@@ -11,6 +11,8 @@ fls = glob.glob("/gs/input/*")
 if len(fls) < 2:
     print("input folder is empty")
     exit()
+    print('dsjkjsfhdsf')
+    
 print("sample of data in the input folder  : ")
 print('------------------------------------')
 m = len(fls)
