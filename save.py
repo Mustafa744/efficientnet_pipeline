@@ -152,6 +152,9 @@ def parse_tfrecord(tfrecord_path, saved_model_path, signature_key='classify'):
             # Print the TFRecord content for debugging
             print("TFRecord Content:")
             print(example)
+            # write to txt file
+            with open(vh.outputs().path("tf.txt"), "w") as f:
+                f.write(str(example))
 
             # Check if 'image' feature exists in the example
             if 'image' not in example.features.feature:
