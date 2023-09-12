@@ -111,7 +111,7 @@ def load_label_map(label_map_path):
     return label_map_dict
 
 # Example usage:
-label_map_path = vh.inputs().path("labels_map")  # Replace with your file path
+label_map_path = vh.inputs("labels_map").path()  # Replace with your file path
 label_map = load_label_map(label_map_path)
 print("Class ID to Class Name Mapping:")
 for class_id, class_name in label_map.items():
