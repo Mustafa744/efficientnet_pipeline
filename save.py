@@ -101,22 +101,22 @@ def process_prediction(predictions, label_map_dict):
     """Process model predictions and return class label, class name, and probability.
 
     Args:
-        predictions (dict): Model predictions with 'classes' and 'probabilities' keys.
+        predictions (dict): Model predictions with 'Predicted Classes' and 'Predicted Probabilities' keys.
         label_map_dict (dict): A dictionary mapping class labels to class names.
 
     Returns:
         dict: Class label, class name, and probability.
     """
-    class_label = predictions['classes'][0].numpy()
+    class_label = predictions['Predicted Classes'][0].numpy()
     class_name = label_map_dict.get(class_label, 'Unknown Class')
-    probability = predictions['probabilities'][0].numpy()
+    probability = predictions['Predicted Probabilities'][0].numpy()
 
     return {
         "Class Label": class_label,
         "Class Name": class_name,
         "Probability": probability
     }
-    
+
 def parse_tfrecord(tfrecord_path, saved_model_path, signature_key='classify'):
     """Parse a TFRecord file and make predictions on its contents.
 
