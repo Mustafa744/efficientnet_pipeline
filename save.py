@@ -18,7 +18,7 @@ os.system(f"mkdir /home/tensorflow/models/research/saved_model/variables")
 print("***************************")
 for path in vh.inputs("saved_model").paths():
     print(path)
-    if(path.contains("saved_model.pb")):
+    if "saved_model.pb" in path:
         os.system(f"cp {path} /home/tensorflow/models/research/saved_model")
     else:
         os.system(f"cp {path} /home/tensorflow/models/research/saved_model/variables")
