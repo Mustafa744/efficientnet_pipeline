@@ -18,12 +18,12 @@ os.system(f"mkdir /home/tensorflow/models/research/saved_model/variables")
 print("***************************")
 for path in vh.inputs("saved_model").paths():
     print(path)
-    # os.system(f"cp {path} /home/tensorflow/models/research/new/trained_model")
-
-# test if files were copied
-# with vh.metadata.logger() as logger:
-#     logger.log("checkpoint path", checkpoint_dir)
-#     logger.log("checkpoint directory content: ", os.listdir(checkpoint_dir))
+    if(path.contains("saved_model.pb")):
+        os.system(f"cp {path} /home/tensorflow/models/research/saved_model")
+    else:
+        os.system(f"cp {path} /home/tensorflow/models/research/saved_model/variables")
+print("***************************")
+print(os.listdir("/home/tensorflow/models/research/saved_model"))
 
 
 # meta_file = checkpoint_dir + "/model.ckpt-0.meta"
