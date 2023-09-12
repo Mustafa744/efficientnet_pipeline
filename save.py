@@ -57,7 +57,7 @@ from PIL import Image
 import io
 
 
-tf.compat.v1.disable_eager_execution()
+# tf.compat.v1.disable_eager_execution()
 saved_model_path = '/home/tensorflow/models/research/saved_model'  # Updated path
 # load the tf model from the previous step
 # prepare the saved model folder
