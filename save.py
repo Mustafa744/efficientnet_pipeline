@@ -24,6 +24,8 @@ for path in vh.inputs("saved_model").paths():
         os.system(f"cp {path} /home/tensorflow/models/research/saved_model/variables")
 print("***************************")
 print(os.listdir("/home/tensorflow/models/research/saved_model"))
+print("***************************")
+print(os.listdir("/home/tensorflow/models/research/saved_model/variables"))
 
 # load model test
 
