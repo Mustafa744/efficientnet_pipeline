@@ -154,7 +154,8 @@ def parse_tfrecord(tfrecord_path, saved_model_path, signature_key='classify'):
 
         except Exception as e:
             print(f"Error processing TFRecord: {e}")
-
+    with vh.metadata.logger() as logger:
+        logger.log("predictions", predictions_list)
     return predictions_list
 
 def calculate_class_metrics(predictions_list, label_map_dict, confidence_threshold=0.05):
