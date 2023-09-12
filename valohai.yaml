@@ -33,6 +33,7 @@
     inputs:
       - name: trained_model
       - name: saved_model
+      - name: labels_map
     command:
       - pip install --upgrade pip
       - pip install -r requirements.txt

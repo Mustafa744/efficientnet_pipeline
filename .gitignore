@@ -1,4 +1,2 @@
-saved/variables.index
-saved/variables.data-00000-of-00001
-saved/saved_model.pb
+saved/*
 load_saved_model.py
