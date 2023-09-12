@@ -34,6 +34,7 @@
       - name: trained_model
       - name: saved_model
       - name: labels_map
+        default: gs://valohai_object_detection/data/test-classification-2/64ff46a216124d7a7076db20/tfrecords/labelmap.pbtxt
     command:
       - pip install --upgrade pip
       - pip install -r requirements.txt

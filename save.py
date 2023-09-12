@@ -53,6 +53,9 @@ import tensorflow as tf
 import numpy as np
 import valohai as vh
 import os
+from PIL import Image
+import io
+
 
 tf.compat.v1.disable_eager_execution()
 saved_model_path = '/home/tensorflow/models/research/saved_model'  # Updated path
@@ -67,53 +70,100 @@ for path in vh.inputs("saved_model").paths():
     else:
         os.system(f"cp {path} /home/tensorflow/models/research/saved_model/variables")
 
-# load model
-try:
-    model = tf.saved_model.load(saved_model_path)
-    signature_key = 'classify'
-    signature = model.signatures[signature_key]
-    input_tensor_name = signature.inputs[0].name
-    print("model loaded", input_tensor_name)
-except Exception as e:
-    print("failed to load model",e)
-
-def make_prediction(image):
-    #TODO:implement the function
-    pass
-
-def proccess_tfrecord(tfrecord_path):
-    # get images and labels from tfrecord of the test dataset
-    pass
-# label_map_util.py
-
-import tensorflow as tf
-
-def load_label_map(label_map_path):
-    """Load a label map from a labels_map.pbtxt file.
-
-    Args:
-        label_map_path (str): Path to the labels_map.pbtxt file.
-
-    Returns:
-        dict: A dictionary mapping class IDs to class names.
-    """
-    label_map_dict = {}
-    
-    with tf.io.gfile.GFile(label_map_path, 'r') as f:
-        label_map_data = f.read()
-        label_map_list = label_map_data.split('item {')[1:]  # Split into individual class definitions
-        
-        for item in label_map_list:
-            item_id = int(item.split('id: ')[1].split('\n')[0])
-            item_name = item.split('name: ')[1].split('\n')[0].strip('"')
-            label_map_dict[item_id] = item_name
-
-    return label_map_dict
-
 # Example usage:
 label_map_path = vh.inputs("labels_map").path()  # Replace with your file path
-label_map = load_label_map(label_map_path)
-print("Class ID to Class Name Mapping:")
-for class_id, class_name in label_map.items():
-    print(f"Class ID: {class_id}, Class Name: {class_name}")
+# label_map = load_label_map(label_map_path)
+saved_model_path = '/home/tensorflow/models/research/saved_model'  # Updated path
+tfrecord_path = vh.inputs("labels_map").path() 
+
+def load_model(saved_model_path, signature_key='classify'):
+    """Load a TensorFlow SavedModel and return the model and signature.
+
+    Args:
+        saved_model_path (str): Path to the SavedModel directory.
+        signature_key (str): The signature key to use ('classify' or 'serving_default').
+
+    Returns:
+        tf.saved_model.SavedModel: The loaded model.
+        tf.function: The selected signature function.
+    """
+    loaded_model = tf.saved_model.load(saved_model_path)
+    signature = loaded_model.signatures[signature_key]
+    return loaded_model, signature
+
+def predict_with_model(model, signature, image_bytes):
+    """Predict the class of an image using a loaded TensorFlow model.
+
+    Args:
+        model (tf.saved_model.SavedModel): The loaded TensorFlow model.
+        signature (tf.function): The selected signature function.
+        image_bytes (bytes): Serialized image data.
+
+    Returns:
+        dict: Predicted classes and probabilities.
+    """
+    # Load and preprocess the image
+    image = Image.open(io.BytesIO(image_bytes))
+    image = image.convert("RGB")
+    image = image.resize((224, 224))
+    image_bytes = io.BytesIO()
+    image.save(image_bytes, format="JPEG")
+    input_data_bytes = image_bytes.getvalue()
+
+    # Prepare input tensor as a string tensor
+    input_tensor = tf.constant([input_data_bytes], dtype=tf.string)
+
+    # Make a prediction using the signature
+    predictions = signature(input_tensor)
+
+    # Extract the output tensors from the predictions
+    output_classes = predictions['classes']
+    output_probabilities = predictions['probabilities']
+
+    # Return the predicted classes and probabilities
+    return {"Predicted Classes": output_classes, "Predicted Probabilities": output_probabilities}
+
+def parse_tfrecord(tfrecord_path, saved_model_path, signature_key='classify'):
+    """Parse a TFRecord file and make predictions on its contents.
+
+    Args:
+        tfrecord_path (str): Path to the TFRecord file.
+        saved_model_path (str): Path to the SavedModel directory.
+        signature_key (str): The signature key to use ('classify' or 'serving_default').
+
+    Returns:
+        list: List of dictionaries with predicted classes and probabilities for each record.
+    """
+    # Load the model and signature
+    model, signature = load_model(saved_model_path, signature_key)
+
+    # Create a TFRecord dataset from the file
+    dataset = tf.data.TFRecordDataset(tfrecord_path)
+
+    predictions_list = []
+
+    # Iterate through the dataset and make predictions
+    for record in dataset:
+        # Parse the TFRecord example
+        example = tf.train.Example()
+        example.ParseFromString(record.numpy())
+
+        # Extract image data (adjust feature keys as needed)
+        image_bytes = example.features.feature['image'].bytes_list.value[0]
+
+        # Make predictions on the image
+        predictions = predict_with_model(model, signature, image_bytes)
+
+        # Append the predictions to the list
+        predictions_list.append(predictions)
+
+    return predictions_list
+
+predictions = parse_tfrecord(tfrecord_path, saved_model_path)
+
+# Print the predictions (you can process them further as needed)
+for idx, prediction in enumerate(predictions, start=1):
+    print(f"Prediction for Example {idx}: {prediction}")
+
+
 
