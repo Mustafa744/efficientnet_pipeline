@@ -6,6 +6,7 @@ import json
 import datetime
 import valohai as vh
 import os
+import ast
 
 
 # tf.compat.v1.disable_eager_execution()
@@ -148,6 +149,10 @@ def parse_tfrecord(tfrecord_path, saved_model_path, signature_key='classify'):
 
             # Make predictions on the image
             predictions = predict_with_model(model, signature, image_encoded)
+
+            # Convert tensor strings to actual tensors
+            predictions['Predicted Classes'] = ast.literal_eval(predictions['Predicted Classes'].numpy())
+            predictions['Predicted Probabilities'] = ast.literal_eval(predictions['Predicted Probabilities'].numpy())
 
             # Append the predictions to the list
             predictions_list.append(predictions)
