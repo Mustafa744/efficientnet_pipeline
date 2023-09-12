@@ -149,29 +149,17 @@ def parse_tfrecord(tfrecord_path, saved_model_path, signature_key='classify'):
             example = tf.train.Example()
             example.ParseFromString(record.numpy())
 
-            # Print the TFRecord content for debugging
-            # print("TFRecord Content:")
-            # print(example)
-            # write to txt file
-            with open(vh.outputs().path("tf.txt"), "w") as f:
-                f.write(str(example))
-
-            # Check if 'image' feature exists in the example
-            if 'image' not in example.features.feature:
-                continue  # Skip this record and move to the next one
-
-            # Extract image data
-            image_bytes = example.features.feature['image'].bytes_list.value[0]
+            # Extract image data (update feature keys as needed)
+            image_encoded = example.features.feature['image/encoded'].bytes_list.value[0]
 
             # Make predictions on the image
-            predictions = predict_with_model(model, signature, image_bytes)
+            predictions = predict_with_model(model, signature, image_encoded)
 
             # Append the predictions to the list
             predictions_list.append(predictions)
 
-        except IndexError:
-            print("Error: 'image' feature not found or empty in the TFRecord. Skipping this record.")
-            continue
+        except Exception as e:
+            print(f"Error processing TFRecord: {e}")
 
     return predictions_list
 
