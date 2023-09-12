@@ -150,8 +150,8 @@ def parse_tfrecord(tfrecord_path, saved_model_path, signature_key='classify'):
             example.ParseFromString(record.numpy())
 
             # Print the TFRecord content for debugging
-            print("TFRecord Content:")
-            print(example)
+            # print("TFRecord Content:")
+            # print(example)
             # write to txt file
             with open(vh.outputs().path("tf.txt"), "w") as f:
                 f.write(str(example))
