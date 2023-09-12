@@ -15,9 +15,9 @@ checkpoint_dir = "/home/tensorflow/models/research/new/trained_model"
 # os.mkdir("/home/saved_model/variables")
 os.system(f"mkdir /home/tensorflow/models/research/saved_model")
 os.system(f"mkdir /home/tensorflow/models/research/saved_model/variables")
-with vh.metadata.logger() as logger:
-    for path in vh.inputs("saved_model").paths():
-        logger.log("path", path)
+print("***************************")
+for path in vh.inputs("saved_model").paths():
+    print(path)
     # os.system(f"cp {path} /home/tensorflow/models/research/new/trained_model")
 
 # test if files were copied
