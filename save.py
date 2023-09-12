@@ -28,8 +28,7 @@ label_map_path = vh.inputs("labels_map").path()  # Replace with your file path
 saved_model_path = '/home/tensorflow/models/research/saved_model'  # Updated path
 # tfrecord_path = "gs://valohai_object_detection/data/01FZC/01FZCRSPP49MRZ3XTZE8Q8BN3V/output-315/trained/efficientnet/validation-0.tfrecord-00000-of-00001"
 tfrecord_path = vh.inputs("tf_record").path()
-with vh.metadata.logger() as logger:
-    logger.log("tfrecord_path", tfrecord_path)
+print("tfrecord_path", tfrecord_path)
     
 def load_label_map(label_map_path):
     """Load a label map from a labels_map.pbtxt file.
@@ -159,7 +158,8 @@ def parse_tfrecord(tfrecord_path, saved_model_path, signature_key='classify'):
             predictions_list.append(predictions)
 
         except Exception as e:
-            print(f"Error processing TFRecord: {e}")
+            # print(f"Error processing TFRecord: {e}")
+            pass
             
     with vh.metadata.logger() as logger:
         logger.log("predictions", predictions_list)
