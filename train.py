@@ -19,22 +19,18 @@ num_label_classes = vh.parameters("num_label_classes").value
 train_batch_size = vh.parameters("train_batch_size").value
 
 print(data_dir)
+os.mkdir("/home/tensorflow/models/research/saved")
 os.system(
-    f"""python /home/tensorflow/models/research/models/official/efficientnet/main.py --use_tpu=False --data_dir={data_dir} --model_dir=/home/tensorflow/models/research/new/ --train_steps=10 --skip_host_call=true --num_label_classes=5 --train_batch_size=8 --export_dir={vh.outputs().path('saved_model.pb')}"""
+    f"""python /home/tensorflow/models/research/models/official/efficientnet/main.py --use_tpu=False --data_dir={data_dir} --model_dir=/home/tensorflow/models/research/new/ --train_steps=10 --skip_host_call=true --num_label_classes=5 --train_batch_size=8 --export_dir=/home/tensorflow/models/research/saved"""
 )
 
 
-path = vh.outputs().path("trained")
-shutil.make_archive(path, "zip", "/home/tensorflow/models/research/new/")
-with vh.metadata.logger() as logger:
-    logger.log("model", path)
-    logger.log("listing temp directory", os.listdir("/tmp"))
-    if "labels_map.pbtxt" in os.listdir("/tmp"):
-        logger.log("found labels_map.pbtxt")
-        os.mv("/tmp/labels_map.pbtxt", vh.outputs().path("labels_map.pbtxt"))
-    
-    elif "labels_map.txt" in os.listdir("/tmp"):
-        os.mv("/tmp/labels_map.txt", vh.outputs().path("labels_map.txt"))
+checkpoint_path = vh.outputs().path("trained")
+saved_path = vh.outputs().path("saved")
+
+shutil.make_archive(checkpoint_path, "zip", "/home/tensorflow/models/research/new/")
+shutil.make_archive(saved_path, "zip", "/home/tensorflow/models/research/saved")
+
         
 
 os.system(

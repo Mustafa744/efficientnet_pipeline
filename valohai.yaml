@@ -5,7 +5,7 @@
     inputs:
       - name: tfrecords
         # default: gs://valohai_object_detection/data/01FZC/01FZCRSPP49MRZ3XTZE8Q8BN3V/output-315/trained/efficientnet/**
-        default: 
+        default:
           - gs://valohai_object_detection/data/01FZC/01FZCRSPP49MRZ3XTZE8Q8BN3V/output-315/trained/efficientnet/dataset_info.json
           - gs://valohai_object_detection/data/01FZC/01FZCRSPP49MRZ3XTZE8Q8BN3V/output-315/trained/efficientnet/features.json
           - gs://valohai_object_detection/data/01FZC/01FZCRSPP49MRZ3XTZE8Q8BN3V/output-315/trained/efficientnet/test-0.tfrecord-00000-of-00001
@@ -15,7 +15,7 @@
       - name: train_steps
         default: 5
       - name: model_dir
-        default: '/home/tensorflow/models/research/new/'
+        default: "/home/tensorflow/models/research/new/"
       - name: num_label_classes
         default: 5
       - name: train_batch_size
@@ -25,12 +25,12 @@
       - pip install -r requirements.txt
       - python train.py
 
-
 - step:
     name: save step
     image: mo0haned/net
     inputs:
       - name: trained_model
+      - name: saved_model
     command:
       - pip install --upgrade pip
       - pip install -r requirements.txt
@@ -49,16 +49,17 @@
 - pipeline:
     name: preprocess-and-train
     nodes:
-    - name: train
-      type: execution
-      step: train step
-    - name: save
-      type: execution
-      step: save step
-    - name: evaluate
-      type: execution
-      step: eval step
+      - name: train
+        type: execution
+        step: train step
+      - name: save
+        type: execution
+        step: save step
+      - name: evaluate
+        type: execution
+        step: eval step
 
     edges:
-    - [train.output.trained.zip, save.input.trained_model]
-    - [save.output.frozen_graph.pb, evaluate.input.frozen_model]
+      - [train.output.trained.zip, save.input.trained_model]
+      - [train.output.saved.zip, save.input.saved_model]
+      - [save.output.frozen_graph.pb, evaluate.input.frozen_model]
