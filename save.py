@@ -102,22 +102,21 @@ def process_prediction(predictions, label_map_dict):
     """Process model predictions and return class label, class name, and probability.
 
     Args:
-        predictions (dict): Model predictions with 'Predicted Classes' and 'Predicted Probabilities' keys.
+        predictions (dict): Model predictions with 'classes' and 'probabilities' keys.
         label_map_dict (dict): A dictionary mapping class labels to class names.
 
     Returns:
         dict: Class label, class name, and probability.
     """
-    class_label = predictions['Predicted Classes'][0].numpy()
+    class_label = predictions['Predicted Classes'][0]
     class_name = label_map_dict.get(class_label, 'Unknown Class')
-    probability = predictions['Predicted Probabilities'][0].numpy()
+    probability = predictions['Predicted Probabilities'][0].tolist()  # Convert to a Python list
 
     return {
         "Class Label": class_label,
         "Class Name": class_name,
         "Probability": probability
     }
-
 def parse_tfrecord(tfrecord_path, saved_model_path, signature_key='classify'):
     """Parse a TFRecord file and make predictions on its contents.
 
@@ -247,7 +246,7 @@ evaluation_json = calculate_class_metrics(predictions, label_map_dict, confidenc
 
 # Print or save the evaluation JSON
 print(json.dumps(evaluation_json, indent=2))
-# save the evaluation JSON
-with vh.outputs("evaluation.json").open("w") as f:
+# save the evaluation JSON as json file 
+with open(vh.outputs().path("evaluation.json"), 'w') as f:
     json.dump(evaluation_json, f, indent=2)
 
