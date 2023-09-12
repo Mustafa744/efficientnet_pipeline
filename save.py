@@ -1,60 +1,10 @@
-# import os, glob
-# import valohai as vh
-# import re
-# import tarfile
-# import shutil
-# import zipfile
-# import time
-# import tensorflow as tf
-
-# tf.compat.v1.disable_eager_execution()
-
-# # copy the checkpoint files to the new folder
-# checkpoint_dir = "/home/tensorflow/models/research/new/trained_model"
-# # os.mkdir("/home/saved_model")
-# # os.mkdir("/home/saved_model/variables")
-# os.system(f"mkdir /home/tensorflow/models/research/saved_model")
-# os.system(f"mkdir /home/tensorflow/models/research/saved_model/variables")
-# print("***************************")
-# for path in vh.inputs("saved_model").paths():
-#     print(path)
-#     if "saved_model.pb" in path:
-#         os.system(f"cp {path} /home/tensorflow/models/research/saved_model")
-#     else:
-#         os.system(f"cp {path} /home/tensorflow/models/research/saved_model/variables")
-# print("***************************")
-# print(os.listdir("/home/tensorflow/models/research/saved_model"))
-# print("***************************")
-# print(os.listdir("/home/tensorflow/models/research/saved_model/variables"))
-
-# # load model test
-
-# try:
-#     # Specify the updated path to the SavedModel directory
-#     saved_model_path = '/home/tensorflow/models/research/saved_model'  # Updated path
-
-#     # Load the SavedModel
-#     loaded_model = tf.saved_model.load(saved_model_path)
-
-#     # Select the signature you want to use ('classify' or 'serving_default')
-#     signature_key = 'classify'  # Replace with 'serving_default' if needed
-
-#     # Get the input and output tensor names from the selected signature
-#     signature = loaded_model.signatures[signature_key]
-
-#     # Get the name of the input tensor directly
-#     input_tensor_name = signature.inputs[0].name
-#     print("model loaded", input_tensor_name)
-# except Exception as e:
-#     print("failed to load model",e)
-# ###########################################
-
 import tensorflow as tf
 import numpy as np
 import valohai as vh
 import os
 from PIL import Image
 import io
+import json
 
 
 # tf.compat.v1.disable_eager_execution()
@@ -76,6 +26,29 @@ label_map_path = vh.inputs("labels_map").path()  # Replace with your file path
 saved_model_path = '/home/tensorflow/models/research/saved_model'  # Updated path
 # tfrecord_path = "gs://valohai_object_detection/data/01FZC/01FZCRSPP49MRZ3XTZE8Q8BN3V/output-315/trained/efficientnet/validation-0.tfrecord-00000-of-00001"
 tfrecord_path = vh.inputs("tf_record").path()
+
+def load_label_map(label_map_path):
+    """Load a label map from a labels_map.pbtxt file.
+
+    Args:
+        label_map_path (str): Path to the labels_map.pbtxt file.
+
+    Returns:
+        dict: A dictionary mapping class IDs to class names.
+    """
+    label_map_dict = {}
+    
+    with tf.io.gfile.GFile(label_map_path, 'r') as f:
+        label_map_data = f.read()
+        label_map_list = label_map_data.split('item {')[1:]  # Split into individual class definitions
+        
+        for item in label_map_list:
+            item_id = int(item.split('id: ')[1].split('\n')[0])
+            item_name = item.split('name: ')[1].split('\n')[0].strip('"')
+            label_map_dict[item_id] = item_name
+
+    return label_map_dict
+
 def load_model(saved_model_path, signature_key='classify'):
     """Load a TensorFlow SavedModel and return the model and signature.
 
@@ -123,6 +96,26 @@ def predict_with_model(model, signature, image_bytes):
     # Return the predicted classes and probabilities
     return {"Predicted Classes": output_classes, "Predicted Probabilities": output_probabilities}
 
+def process_prediction(predictions, label_map_dict):
+    """Process model predictions and return class label, class name, and probability.
+
+    Args:
+        predictions (dict): Model predictions with 'classes' and 'probabilities' keys.
+        label_map_dict (dict): A dictionary mapping class labels to class names.
+
+    Returns:
+        dict: Class label, class name, and probability.
+    """
+    class_label = predictions['classes'][0].numpy()
+    class_name = label_map_dict.get(class_label, 'Unknown Class')
+    probability = predictions['probabilities'][0].numpy()
+
+    return {
+        "Class Label": class_label,
+        "Class Name": class_name,
+        "Probability": probability
+    }
+    
 def parse_tfrecord(tfrecord_path, saved_model_path, signature_key='classify'):
     """Parse a TFRecord file and make predictions on its contents.
 
@@ -163,11 +156,87 @@ def parse_tfrecord(tfrecord_path, saved_model_path, signature_key='classify'):
 
     return predictions_list
 
+def calculate_class_metrics(predictions_list, label_map_dict, confidence_threshold=0.05):
+    """Calculate class-wise evaluation metrics for each class based on predictions.
+
+    Args:
+        predictions_list (list): List of dictionaries containing predictions for each record.
+        label_map_dict (dict): A dictionary mapping class names to class labels.
+        confidence_threshold (float): Threshold for considering a prediction as positive.
+
+    Returns:
+        dict: Evaluation metrics for each class in the specified format.
+    """
+    evaluation_time = datetime.datetime.now().strftime("%Y/%m/%d %H:%M:%S")
+    execution_time = 263431  # Replace with the actual execution time
+    model_id = "classification-model-1-1684231321135"  # Replace with the actual model ID
+    
+    evaluation_json = {
+        "createTime": evaluation_time,
+        "execution_time": execution_time,
+        "id": model_id,
+        "evaluatedPerClass": {}
+    }
+
+    for class_name, class_label in label_map_dict.items():
+        class_metrics = {
+            "confidenceMetricsEntry": []
+        }
+
+        true_positives = 0
+        false_positives = 0
+        false_negatives = 0
+
+        for prediction in predictions_list:
+            true_class_label = prediction["Class Label"]
+            probability = prediction["Probability"]
+
+            is_positive = probability >= confidence_threshold
+
+            if true_class_label == class_label and is_positive:
+                true_positives += 1
+            elif true_class_label != class_label and is_positive:
+                false_positives += 1
+            elif true_class_label == class_label and not is_positive:
+                false_negatives += 1
+
+        precision = true_positives / (true_positives + false_positives + 1e-8)
+        recall = true_positives / (true_positives + false_negatives + 1e-8)
+        f1_score = 2 * (precision * recall) / (precision + recall + 1e-8)
+
+        class_metrics["confidenceMetricsEntry"].append({
+            "confidenceThreshold": confidence_threshold,
+            "f1score": f1_score,
+            "precision": precision,
+            "recall": recall
+        })
+
+        evaluation_json["evaluatedPerClass"][class_name] = class_metrics
+
+    return evaluation_json
 predictions = parse_tfrecord(tfrecord_path, saved_model_path)
 
-# Print the predictions (you can process them further as needed)
-for idx, prediction in enumerate(predictions, start=1):
-    print(f"Prediction for Example {idx}: {prediction}")
+# # Print the predictions (you can process them further as needed)
+# for idx, prediction in enumerate(predictions, start=1):
+#     print(f"Prediction for Example {idx}: {prediction}")
 
+# Load the label map from the provided labels_map.pbtxt file
+label_map_path = vh.inputs("labels_map").path()  # Replace with your file path
+label_map_dict = load_label_map(label_map_path)
 
+# Specify the path to the SavedModel
+saved_model_path = '/home/tensorflow/models/research/saved_model'  # Updated path
+
+# Specify the path to the TFRecord file
+tfrecord_path = vh.inputs("tf_record").path()  # Replace with your TFRecord file path
+
+# Parse the TFRecord and make predictions
+predictions = parse_tfrecord(tfrecord_path, saved_model_path)
+
+# Calculate class-wise metrics
+confidence_threshold = 0.05  # Replace with your desired confidence threshold
+evaluation_json = calculate_class_metrics(predictions, label_map_dict, confidence_threshold)
+
+# Print or save the evaluation JSON
+print(json.dumps(evaluation_json, indent=2))
 
