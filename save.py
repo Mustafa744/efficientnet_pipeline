@@ -138,7 +138,7 @@ def parse_tfrecord(tfrecord_path, saved_model_path, signature_key='classify'):
     predictions_list = []
 
     # Iterate through the dataset and make predictions
-    for record in dataset:
+    for idx, record in enumerate(dataset, start=1):
         try:
             # Parse the TFRecord example
             example = tf.train.Example()
@@ -150,16 +150,11 @@ def parse_tfrecord(tfrecord_path, saved_model_path, signature_key='classify'):
             # Make predictions on the image
             predictions = predict_with_model(model, signature, image_encoded)
 
-            # Convert tensor strings to actual tensors
-            predictions['Predicted Classes'] = ast.literal_eval(predictions['Predicted Classes'].numpy())[0]
-            predictions['Predicted Probabilities'] = ast.literal_eval(predictions['Predicted Probabilities'].numpy())[0]
-
             # Append the predictions to the list
             predictions_list.append(predictions)
 
         except Exception as e:
-            # print(f"Error processing TFRecord: {e}")
-            pass
+            print(f"Error processing TFRecord {idx}: {e}")
             
     with vh.metadata.logger() as logger:
         logger.log("predictions", predictions_list)
@@ -246,8 +241,6 @@ predictions = parse_tfrecord(tfrecord_path, saved_model_path)
 confidence_threshold = 0.05  # Replace with your desired confidence threshold
 evaluation_json = calculate_class_metrics(predictions, label_map_dict, confidence_threshold)
 
-# Print or save the evaluation JSON
-print(json.dumps(evaluation_json, indent=2))
 # save the evaluation JSON as json file 
 with open(vh.outputs().path("evaluation.json"), 'w') as f:
     json.dump(evaluation_json, f, indent=2)
