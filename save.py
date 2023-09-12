@@ -74,8 +74,8 @@ for path in vh.inputs("saved_model").paths():
 label_map_path = vh.inputs("labels_map").path()  # Replace with your file path
 # label_map = load_label_map(label_map_path)
 saved_model_path = '/home/tensorflow/models/research/saved_model'  # Updated path
-tfrecord_path = vh.inputs("labels_map").path() 
-
+# tfrecord_path = "gs://valohai_object_detection/data/01FZC/01FZCRSPP49MRZ3XTZE8Q8BN3V/output-315/trained/efficientnet/validation-0.tfrecord-00000-of-00001"
+tfrecord_path = vh.inputs("tf_record").path()
 def load_model(saved_model_path, signature_key='classify'):
     """Load a TensorFlow SavedModel and return the model and signature.
 
