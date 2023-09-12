@@ -151,14 +151,15 @@ def parse_tfrecord(tfrecord_path, saved_model_path, signature_key='classify'):
             predictions = predict_with_model(model, signature, image_encoded)
 
             # Convert tensor strings to actual tensors
-            predictions['Predicted Classes'] = ast.literal_eval(predictions['Predicted Classes'].numpy())
-            predictions['Predicted Probabilities'] = ast.literal_eval(predictions['Predicted Probabilities'].numpy())
+            predictions['Predicted Classes'] = ast.literal_eval(predictions['Predicted Classes'].numpy())[0]
+            predictions['Predicted Probabilities'] = ast.literal_eval(predictions['Predicted Probabilities'].numpy())[0]
 
             # Append the predictions to the list
             predictions_list.append(predictions)
 
         except Exception as e:
             print(f"Error processing TFRecord: {e}")
+            
     with vh.metadata.logger() as logger:
         logger.log("predictions", predictions_list)
     return predictions_list
@@ -246,4 +247,7 @@ evaluation_json = calculate_class_metrics(predictions, label_map_dict, confidenc
 
 # Print or save the evaluation JSON
 print(json.dumps(evaluation_json, indent=2))
+# save the evaluation JSON
+with vh.outputs("evaluation.json").open("w") as f:
+    json.dump(evaluation_json, f, indent=2)
 
