@@ -43,5 +43,5 @@ try:
     # Get the name of the input tensor directly
     input_tensor_name = signature.inputs[0].name
     print("model loaded", input_tensor_name)
-except:
-    print("failed to load model")
+except Exception as e:
+    print("failed to load model",e)
