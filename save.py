@@ -25,28 +25,23 @@ for path in vh.inputs("saved_model").paths():
 print("***************************")
 print(os.listdir("/home/tensorflow/models/research/saved_model"))
 
+# load model test
 
-# meta_file = checkpoint_dir + "/model.ckpt-0.meta"
+try:
+    # Specify the updated path to the SavedModel directory
+    saved_model_path = '/home/saved'  # Updated path
 
-# saver = tf.compat.v1.train.import_meta_graph(meta_file)
-# checkpoint = tf.compat.v1.train.latest_checkpoint(checkpoint_dir)
+    # Load the SavedModel
+    loaded_model = tf.saved_model.load(saved_model_path)
 
-# # Create a TensorFlow 1 session
-# with tf.compat.v1.Session() as sess:
-#     # Restore the checkpoint variables
-#     saver.restore(sess, checkpoint)
+    # Select the signature you want to use ('classify' or 'serving_default')
+    signature_key = 'classify'  # Replace with 'serving_default' if needed
 
-#     # Get the names of all the nodes in the graph
-#     all_node_names = [
-#         n.name for n in tf.compat.v1.get_default_graph().as_graph_def().node
-#     ]
+    # Get the input and output tensor names from the selected signature
+    signature = loaded_model.signatures[signature_key]
 
-#     # Freeze the entire TensorFlow 1 graph
-#     frozen_graph_def = tf.compat.v1.graph_util.extract_sub_graph(
-#         sess.graph_def, all_node_names
-#     )
-
-#     # Replace 'frozen_graph.pb' with the desired output pb file path
-#     pb_file_path = f"""{vh.outputs().path("frozen_graph.pb")}"""
-#     with tf.io.gfile.GFile(pb_file_path, "wb") as f:
-#         f.write(frozen_graph_def.SerializeToString())
+    # Get the name of the input tensor directly
+    input_tensor_name = signature.inputs[0].name
+    print("model loaded", input_tensor_name)
+except:
+    print("failed to load model")
