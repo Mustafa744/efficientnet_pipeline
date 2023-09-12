@@ -29,7 +29,7 @@ print(os.listdir("/home/tensorflow/models/research/saved_model"))
 
 try:
     # Specify the updated path to the SavedModel directory
-    saved_model_path = '/home/saved'  # Updated path
+    saved_model_path = '/home/tensorflow/models/research/saved_model'  # Updated path
 
     # Load the SavedModel
     loaded_model = tf.saved_model.load(saved_model_path)
