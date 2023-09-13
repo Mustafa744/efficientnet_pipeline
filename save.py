@@ -210,23 +210,22 @@ def calculate_class_metrics(predictions_list, label_map_dict, confidence_thresho
         false_negatives = 0
 
         for prediction in predictions_list:
-            predicted_label = prediction["Predicted Label"]
-            true_label = prediction["True Label"]
+            true_class_label = prediction["True Label"]
+            predicted_class_label = prediction["Predicted Label"]
             probability = float(prediction["Probability"])
 
-            is_positive = True #probability >= confidence_threshold
+            is_positive = probability >= confidence_threshold
 
-            if true_label == class_label and is_positive:
+            if true_class_label == class_label and predicted_class_label == class_label:
                 true_positives += 1
-            elif true_label != class_label and is_positive:
+            elif predicted_class_label == class_label:
                 false_positives += 1
-            elif true_label == class_label and not is_positive:
+            elif true_class_label == class_label:
                 false_negatives += 1
 
         precision = true_positives / (true_positives + false_positives + 1e-8)
         recall = true_positives / (true_positives + false_negatives + 1e-8)
         f1_score = 2 * (precision * recall) / (precision + recall + 1e-8)
-
         class_metrics["confidenceMetricsEntry"].append({
             "confidenceThreshold": confidence_threshold,
             "f1score": f1_score,
