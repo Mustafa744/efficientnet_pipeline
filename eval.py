@@ -23,9 +23,9 @@ import tensorflow_datasets as tfds
 import json
 
 # Define the paths to your TFRecord files
-train_tfrecord_file = 'path/to/train.tfrecord'
-validate_tfrecord_file = 'path/to/validate.tfrecord'
-test_tfrecord_file = 'path/to/test.tfrecord'
+train_tfrecord_file = 'gs://valohai_object_detection/data/01FZC/01FZCRSPP49MRZ3XTZE8Q8BN3V/output-315/trained/efficientnet/train-0.tfrecord-00000-of-00001'
+validate_tfrecord_file = 'gs://valohai_object_detection/data/01FZC/01FZCRSPP49MRZ3XTZE8Q8BN3V/output-315/trained/efficientnet/validation-0.tfrecord-00000-of-00001'
+test_tfrecord_file = 'gs://valohai_object_detection/data/01FZC/01FZCRSPP49MRZ3XTZE8Q8BN3V/output-315/trained/efficientnet/test-0.tfrecord-00000-of-00001'
 
 # Define the features of your dataset
 features = {
