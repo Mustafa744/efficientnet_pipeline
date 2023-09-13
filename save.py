@@ -16,7 +16,6 @@ saved_model_path = '/home/tensorflow/models/research/saved_model'  # Updated pat
 os.system(f"mkdir /home/tensorflow/models/research/saved_model")
 os.system(f"mkdir /home/tensorflow/models/research/saved_model/variables")
 for path in vh.inputs("saved_model").paths():
-    print(path)
     if "saved_model.pb" in path:
         os.system(f"cp {path} /home/tensorflow/models/research/saved_model")
     else:
@@ -28,7 +27,6 @@ label_map_path = vh.inputs("labels_map").path()  # Replace with your file path
 saved_model_path = '/home/tensorflow/models/research/saved_model'  # Updated path
 # tfrecord_path = "gs://valohai_object_detection/data/01FZC/01FZCRSPP49MRZ3XTZE8Q8BN3V/output-315/trained/efficientnet/validation-0.tfrecord-00000-of-00001"
 tfrecord_path = vh.inputs("tf_record").path()
-print("tfrecord_path", tfrecord_path)
     
 def load_label_map(label_map_path):
     """Load a label map from a labels_map.pbtxt file.
@@ -95,6 +93,9 @@ def predict_with_model(model, signature, image_bytes):
     # Extract the output tensors from the predictions
     output_classes = predictions['classes']
     output_probabilities = predictions['probabilities']
+    with vh.metadata.logger() as logger:
+        logger.log("printing prediction...", predictions)
+    raise Exception("stop")
 
     # Return the predicted classes and probabilities
     return {"Predicted Classes": output_classes, "Predicted Probabilities": output_probabilities}
@@ -165,8 +166,8 @@ def parse_tfrecord(tfrecord_path, saved_model_path, signature_key='classify'):
         except Exception as e:
             print(f"Error processing TFRecord {idx}: {e}")
             
-    with vh.metadata.logger() as logger:
-        logger.log("predictions", predictions_list)
+    # with vh.metadata.logger() as logger:
+    #     logger.log("predictions", predictions_list)
     return predictions_list
 
 def calculate_class_metrics(predictions_list, label_map_dict, confidence_threshold=0.05):
@@ -229,10 +230,6 @@ def calculate_class_metrics(predictions_list, label_map_dict, confidence_thresho
     return evaluation_json
 
 predictions = parse_tfrecord(tfrecord_path, saved_model_path)
-
-# # Print the predictions (you can process them further as needed)
-# for idx, prediction in enumerate(predictions, start=1):
-#     print(f"Prediction for Example {idx}: {prediction}")
 
 # Load the label map from the provided labels_map.pbtxt file
 label_map_path = vh.inputs("labels_map").path()  # Replace with your file path
