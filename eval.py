@@ -46,7 +46,7 @@ features_info = {
 
 # Define a function to add feature metadata
 def add_feature_dataset_info(feature_name, dtype, shape):
-    dataset_info['featuresDict']['features'][feature_name] = {
+    features_info['featuresDict']['features'][feature_name] = {
         'pythonClassName': 'tensorflow_datasets.core.features.feature.Feature',
         feature_name: {
             'dtype': dtype,
