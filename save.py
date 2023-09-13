@@ -148,29 +148,29 @@ def parse_tfrecord(tfrecord_path, saved_model_path, signature_key='classify'):
 
     # Iterate through the dataset and make predictions
     for idx, record in enumerate(dataset, start=1):
-        try:
-            # Parse the TFRecord example
-            example = tf.train.Example()
-            example.ParseFromString(record.numpy())
+        # try:
+        # Parse the TFRecord example
+        example = tf.train.Example()
+        example.ParseFromString(record.numpy())
 
-            # Extract image data (update feature keys as needed)
-            image_encoded = example.features.feature['image/encoded'].bytes_list.value[0]
+        # Extract image data (update feature keys as needed)
+        image_encoded = example.features.feature['image/encoded'].bytes_list.value[0]
 
-            # Make predictions on the image
-            prediction = predict_with_model(model, signature, image_encoded)
-            
-            # Process the prediction using the process_prediction function
-            processed_prediction = process_prediction(prediction)
+        # Make predictions on the image
+        prediction = predict_with_model(model, signature, image_encoded)
+        
+        # Process the prediction using the process_prediction function
+        processed_prediction = process_prediction(prediction)
 
-            # Append the processed prediction to the list
-            predictions_list.append(processed_prediction)
+        # Append the processed prediction to the list
+        predictions_list.append(processed_prediction)
 
-            # Append the prediction to the list
-            predictions_list.append(prediction)
+        # Append the prediction to the list
+        predictions_list.append(prediction)
 
-        except Exception as e:
-            print(f"Error processing TFRecord {idx}: {e}")
-            print(e)
+        # except Exception as e:
+        #     print(f"Error processing TFRecord {idx}: {e}")
+        #     print(e)
             
     # with vh.metadata.logger() as logger:
     #     logger.log("predictions", predictions_list)
