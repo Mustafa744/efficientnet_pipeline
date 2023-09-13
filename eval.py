@@ -42,10 +42,10 @@ shapes = {
 }
 
 # Define the default values of your dataset
-defaults = {
-    'feature1': tf.constant(0, dtype=tf.float32),
-    'feature2': tf.constant(0, dtype=tf.int64),
-    'label': tf.constant(0, dtype=tf.int64),
+features = {
+    'feature1': tf.io.FixedLenFeature([], dtype=tf.float32),
+    'feature2': tf.io.FixedLenFeature([], dtype=tf.int64),
+    'label': tf.io.FixedLenFeature([], dtype=tf.int64),
 }
 
 # Create a dictionary to store split information
