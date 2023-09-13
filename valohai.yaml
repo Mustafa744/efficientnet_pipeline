@@ -20,7 +20,6 @@
     environment: valohai-gcp-us-central1-12-64000-1xt4
     inputs:
       - name: tfrecords
-        # default: gs://valohai_object_detection/data/01FZC/01FZCRSPP49MRZ3XTZE8Q8BN3V/output-315/trained/efficientnet/**
         default:
           - gs://valohai_object_detection/data/01FZC/01FZCRSPP49MRZ3XTZE8Q8BN3V/output-315/trained/efficientnet/dataset_info.json
           - gs://valohai_object_detection/data/01FZC/01FZCRSPP49MRZ3XTZE8Q8BN3V/output-315/trained/efficientnet/features.json
@@ -29,6 +28,8 @@
           - gs://valohai_object_detection/data/01FZC/01FZCRSPP49MRZ3XTZE8Q8BN3V/output-315/trained/efficientnet/validation-0.tfrecord-00000-of-00001
       - name: labels_map
         default: gs://valohai_object_detection/data/test-classification-2/64ff46a216124d7a7076db20/tfrecords/labelmap.pbtxt
+      - name: dataset_info
+      - name: features
     parameters:
       - name: train_steps
         default: 5
