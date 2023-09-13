@@ -46,9 +46,12 @@
     name: eval step
     image: mo0haned/net
     inputs:
-      - name: frozen_model
-      - name: dataset_info
-        default: gs://valohai_object_detection/data/01FZC/01FZCRSPP49MRZ3XTZE8Q8BN3V/output-315/trained/efficientnet/dataset_info.json
+      - name: train
+        default: gs://valohai_object_detection/data/01FZC/01FZCRSPP49MRZ3XTZE8Q8BN3V/output-315/trained/efficientnet/train-0.tfrecord-00000-of-00001
+      - name: test
+        default: gs://valohai_object_detection/data/01FZC/01FZCRSPP49MRZ3XTZE8Q8BN3V/output-315/trained/efficientnet/test-0.tfrecord-00000-of-00001
+      - name: validate
+        default: gs://valohai_object_detection/data/01FZC/01FZCRSPP49MRZ3XTZE8Q8BN3V/output-315/trained/efficientnet/validation-0.tfrecord-00000-of-00001
     command:
       - pip install --upgrade pip
       - pip install -r requirements.txt
@@ -71,4 +74,3 @@
       - [train.output.trained.zip, save.input.trained_model]
       - [train.output.saved.zip, save.input.saved_model]
       - [train.input.labels_map, save.input.labels_map]
-      - [save.output.frozen_graph.pb, evaluate.input.frozen_model]
