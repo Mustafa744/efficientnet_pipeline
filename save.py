@@ -153,9 +153,15 @@ def parse_tfrecord(tfrecord_path, saved_model_path, signature_key='classify'):
 
         # Extract image data (update feature keys as needed)
         image_encoded = example.features.feature['image/encoded'].bytes_list.value[0]
+        
+        # Extract the true label and class name from TFRecord
+        true_label = example.features.feature['image/class/label'].int64_list.value[0]
+        true_class_name = label_map_dict.get(true_label, 'Unknown Class')
 
         # Make predictions on the image
         prediction = predict_with_model(model, signature, image_encoded)
+        prediction["True Class Label"] = true_label
+        prediction["True Class Name"] = true_class_name
         
         # Process the prediction using the process_prediction function
         processed_prediction = process_prediction(prediction)
