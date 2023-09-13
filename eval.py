@@ -33,6 +33,7 @@ test_tfrecord_file = vh.inputs("test").path()
 
 # Load a single example from the training dataset to determine the features
 example = next(tf.data.TFRecordDataset(train_tfrecord_file).take(1).as_numpy_iterator())
+example = tf.io.parse_single_example(example, features=None)
 features = {}
 for key in example.keys():
     if example[key].dtype == 'float32':
