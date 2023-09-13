@@ -27,47 +27,31 @@ train_tfrecord_file = 'gs://valohai_object_detection/data/01FZC/01FZCRSPP49MRZ3X
 validate_tfrecord_file = 'gs://valohai_object_detection/data/01FZC/01FZCRSPP49MRZ3XTZE8Q8BN3V/output-315/trained/efficientnet/validation-0.tfrecord-00000-of-00001'
 test_tfrecord_file = 'gs://valohai_object_detection/data/01FZC/01FZCRSPP49MRZ3XTZE8Q8BN3V/output-315/trained/efficientnet/test-0.tfrecord-00000-of-00001'
 
-# Define the features of your dataset
-features = {
-    'feature1': tf.io.FixedLenFeature([], dtype=tf.float32),
-    'feature2': tf.io.FixedLenFeature([], dtype=tf.int64),
-    'label': tf.io.FixedLenFeature([], dtype=tf.int64),
-}
+# Load a single example from the training dataset to determine the features
+example = next(tf.data.TFRecordDataset(train_tfrecord_file).take(1).as_numpy_iterator())
+features = {}
+for key in example.keys():
+    if example[key].dtype == 'float32':
+        features[key] = tf.io.FixedLenFeature([], dtype=tf.float32)
+    elif example[key].dtype == 'int64':
+        features[key] = tf.io.FixedLenFeature([], dtype=tf.int64)
 
 # Define the shapes of your dataset
-shapes = {
-    'feature1': (),
-    'feature2': (),
-    'label': (),
-}
-
-# Define the default values of your dataset
-features = {
-    'feature1': tf.io.FixedLenFeature([], dtype=tf.float32),
-    'feature2': tf.io.FixedLenFeature([], dtype=tf.int64),
-    'label': tf.io.FixedLenFeature([], dtype=tf.int64),
-}
-
-# Create a dictionary to store split information
-splits_info = []
+shapes = {}
+for key in features.keys():
+    shapes[key] = ()
 
 # Load the training dataset
 train_dataset = tf.data.TFRecordDataset(train_tfrecord_file)
 train_dataset = train_dataset.map(lambda x: tf.io.parse_single_example(x, features))
-train_dataset = train_dataset.map(lambda x: ({k: tf.reshape(v, shapes[k]) for k, v in x.items()}, x['label']))
-splits_info.append({'name': 'train', 'size': len(train_dataset)})
 
 # Load the validation dataset
 validate_dataset = tf.data.TFRecordDataset(validate_tfrecord_file)
 validate_dataset = validate_dataset.map(lambda x: tf.io.parse_single_example(x, features))
-validate_dataset = validate_dataset.map(lambda x: ({k: tf.reshape(v, shapes[k]) for k, v in x.items()}, x['label']))
-splits_info.append({'name': 'validation', 'size': len(validate_dataset)})
 
 # Load the testing dataset
 test_dataset = tf.data.TFRecordDataset(test_tfrecord_file)
 test_dataset = test_dataset.map(lambda x: tf.io.parse_single_example(x, features))
-test_dataset = test_dataset.map(lambda x: ({k: tf.reshape(v, shapes[k]) for k, v in x.items()}, x['label']))
-splits_info.append({'name': 'test', 'size': len(test_dataset)})
 
 # Create a `tf.data.Dataset` object for each split
 train_dataset = train_dataset.batch(32)
