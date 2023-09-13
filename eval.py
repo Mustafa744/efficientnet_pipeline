@@ -9,12 +9,30 @@ validate_tfrecord_file = vh.inputs("validate").path()
 test_tfrecord_file = vh.inputs("test").path()
 
 
+# Define a dictionary to store metadata
+metadata = {
+    'pythonClassName': 'tensorflow_datasets.core.features.features_dict.FeaturesDict',
+    'featuresDict': {
+        'features': {},
+    },
+}
+
+# Define a function to add feature metadata
+def add_feature_metadata(feature_name, dtype, shape):
+    metadata['featuresDict']['features'][feature_name] = {
+        'pythonClassName': 'tensorflow_datasets.core.features.feature.Feature',
+        feature_name: {
+            'dtype': dtype,
+            'shape': {
+                'dimensions': [str(dim) for dim in shape],
+            },
+        },
+    }
+
+# Define a function to calculate metadata from a TFRecord file
 def calculate_metadata(tfrecord_path):
     # Create a TFRecord dataset from the file
     dataset = tf.data.TFRecordDataset(tfrecord_path)
-    
-    # Initialize an empty dictionary to store feature information
-    features = {}
 
     # Iterate through the dataset to extract feature information
     for record in dataset.take(1):
@@ -22,29 +40,27 @@ def calculate_metadata(tfrecord_path):
         example.ParseFromString(record.numpy())
 
         for feature_name, feature in example.features.feature.items():
-            dtype = tf.dtypes.as_dtype(feature.WhichOneof('kind')).name
-            shape = feature.ListFields()[0][1].shape
+            if feature.HasField('int64_list'):
+                dtype = 'int64'
+                shape = [len(feature.int64_list.value)]
+            elif feature.HasField('float_list'):
+                dtype = 'float32'  # Modify as needed
+                shape = [len(feature.float_list.value)]
+            elif feature.HasField('bytes_list'):
+                dtype = 'string'  # Modify as needed
+                shape = [len(feature.bytes_list.value)]
+            else:
+                dtype = 'unknown'
+                shape = []
 
-            features[feature_name] = {
-                'pythonClassName': 'tensorflow_datasets.core.features.feature.Feature',
-                feature_name: {
-                    'dtype': dtype,
-                    'shape': {
-                        'dimensions': [str(dim) for dim in shape],
-                    },
-                },
-            }
+            add_feature_metadata(feature_name, dtype, shape)
 
-    return features
-
+# Define a function to generate metadata
 def generate_metadata(tfrecord_path, output_path):
     # Calculate metadata for the TFRecord file
-    metadata = {
-        'pythonClassName': 'tensorflow_datasets.core.features.features_dict.FeaturesDict',
-        'featuresDict': {
-            'features': calculate_metadata(tfrecord_path),
-        },
-    }
+    calculate_metadata(tfrecord_path)
+
+    # Save the metadata to a JSON file
     with open(output_path, 'w') as metadata_file:
         json.dump(metadata, metadata_file, indent=4)
 
