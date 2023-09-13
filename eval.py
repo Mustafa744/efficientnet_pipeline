@@ -29,9 +29,9 @@ test_tfrecord_file = 'gs://valohai_object_detection/data/01FZC/01FZCRSPP49MRZ3XT
 
 # Define the features of your dataset
 features = {
-    'feature1': tf.float32,
-    'feature2': tf.int64,
-    'label': tf.int64,
+    'feature1': tf.io.FixedLenFeature([], dtype=tf.float32),
+    'feature2': tf.io.FixedLenFeature([], dtype=tf.int64),
+    'label': tf.io.FixedLenFeature([], dtype=tf.int64),
 }
 
 # Define the shapes of your dataset
