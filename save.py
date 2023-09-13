@@ -109,8 +109,8 @@ def process_prediction(prediction):
     Returns:
         dict: Class label, class name, and probability.
     """
-    predicted_classes = prediction["classes"].numpy()
-    predicted_probabilities = prediction["probabilities"].numpy()
+    predicted_classes = prediction["Predicted Classes"].numpy()
+    predicted_probabilities = prediction["Predicted Probabilities"].numpy()
     global label_map_dict
     # Assuming 'classes' contains a single class label (tf.Tensor), extract it
     class_label = int(predicted_classes[0])
