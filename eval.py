@@ -31,38 +31,50 @@ train_tfrecord_file = vh.inputs("train").path()
 validate_tfrecord_file = vh.inputs("validate").path()
 test_tfrecord_file = vh.inputs("test").path()
 
-# Define the features of your dataset
-features = {}
-shapes = {}
-for key in ['feature1', 'feature2', 'feature3']:
-    if key == 'feature1':
-        features[key] = tf.io.FixedLenFeature([], dtype=tf.float32)
-        shapes[key] = ()
-    elif key == 'feature2':
-        features[key] = tf.io.FixedLenFeature([], dtype=tf.int64)
-        shapes[key] = ()
-    elif key == 'feature3':
-        features[key] = tf.io.FixedLenFeature([], dtype=tf.string)
-        shapes[key] = ()
+# Create a function to calculate metadata from TFRecord files
+def calculate_metadata(tfrecord_file):
+    features = {}
+    shapes = {}
+    
+    # Read TFRecord files to calculate metadata
+    dataset = tf.data.TFRecordDataset(tfrecord_file)
+    for record in dataset.take(1):
+        example = tf.io.parse_single_example(record, features)
+        for feature_name, feature_tensor in example.items():
+            features[feature_name] = feature_tensor.dtype.name
+            shapes[feature_name] = feature_tensor.shape.as_list()
+    
+    return features, shapes
 
-# Load a single example from each of the three TFRecord files to determine the features
-train_dataset = tf.data.TFRecordDataset(train_tfrecord_file)
-train_example = next(train_dataset.take(1).as_numpy_iterator())
-parsed_train_example = tf.io.parse_single_example(train_example, features)
+# Calculate metadata for train, validate, and test TFRecord files
+train_features, train_shapes = calculate_metadata(train_tfrecord_file)
+validate_features, validate_shapes = calculate_metadata(validate_tfrecord_file)
+test_features, test_shapes = calculate_metadata(test_tfrecord_file)
 
-validate_dataset = tf.data.TFRecordDataset(validate_tfrecord_file)
-validate_example = next(validate_dataset.take(1).as_numpy_iterator())
-parsed_validate_example = tf.io.parse_single_example(validate_example, features)
+# Construct the metadata dictionary
+metadata = {
+    'pythonClassName': 'tensorflow_datasets.core.features.features_dict.FeaturesDict',
+    'featuresDict': {
+        'features': {
+            feature_name: {
+                'pythonClassName': 'tensorflow_datasets.core.features.feature.Feature',
+                feature_name: {
+                    'shape': {
+                        'dimensions': [str(dim) for dim in shape]
+                    },
+                    'dtype': dtype,
+                }
+            }
+            for feature_name, dtype, shape in zip(
+                train_features.keys(), train_features.values(), train_shapes.values()
+            )
+        }
+    }
+}
 
-test_dataset = tf.data.TFRecordDataset(test_tfrecord_file)
-test_example = next(test_dataset.take(1).as_numpy_iterator())
-parsed_test_example = tf.io.parse_single_example(test_example, features)
+# Save the metadata to a JSON file
+with open(vh.outputs().path('metadata.json'), 'w') as metadata_file:
+    json.dump(metadata, metadata_file, indent=4)
 
-# Define the shapes of your dataset
-shapes = {}
-for key in features.keys():
-    shapes[key] = ()
-
-# Save the features to a JSON file
-with open(vh.outputs().path('features.json',), 'w') as f:
-    json.dump({'features': features, 'shapes': shapes}, f)
+# Print the generated metadata
+print(json.dumps(metadata, indent=4))
