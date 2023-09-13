@@ -31,18 +31,32 @@ train_tfrecord_file = vh.inputs("train").path()
 validate_tfrecord_file = vh.inputs("validate").path()
 test_tfrecord_file = vh.inputs("test").path()
 
-# Load a single example from each of the three TFRecord files to determine the features
-train_example = next(tf.data.TFRecordDataset(train_tfrecord_file).take(1).as_numpy_iterator())
-validate_example = next(tf.data.TFRecordDataset(validate_tfrecord_file).take(1).as_numpy_iterator())
-test_example = next(tf.data.TFRecordDataset(test_tfrecord_file).take(1).as_numpy_iterator())
-
 # Define the features of your dataset
 features = {}
-for key in train_example.keys():
-    if train_example[key].dtype == 'float32':
+shapes = {}
+for key in ['feature1', 'feature2', 'feature3']:
+    if key == 'feature1':
         features[key] = tf.io.FixedLenFeature([], dtype=tf.float32)
-    elif train_example[key].dtype == 'int64':
+        shapes[key] = ()
+    elif key == 'feature2':
         features[key] = tf.io.FixedLenFeature([], dtype=tf.int64)
+        shapes[key] = ()
+    elif key == 'feature3':
+        features[key] = tf.io.FixedLenFeature([], dtype=tf.string)
+        shapes[key] = ()
+
+# Load a single example from each of the three TFRecord files to determine the features
+train_dataset = tf.data.TFRecordDataset(train_tfrecord_file)
+train_example = next(train_dataset.take(1).as_numpy_iterator())
+parsed_train_example = tf.io.parse_single_example(train_example, features)
+
+validate_dataset = tf.data.TFRecordDataset(validate_tfrecord_file)
+validate_example = next(validate_dataset.take(1).as_numpy_iterator())
+parsed_validate_example = tf.io.parse_single_example(validate_example, features)
+
+test_dataset = tf.data.TFRecordDataset(test_tfrecord_file)
+test_example = next(test_dataset.take(1).as_numpy_iterator())
+parsed_test_example = tf.io.parse_single_example(test_example, features)
 
 # Define the shapes of your dataset
 shapes = {}
@@ -50,5 +64,5 @@ for key in features.keys():
     shapes[key] = ()
 
 # Save the features to a JSON file
-with open('features.json', 'w') as f:
+with open(vh.outputs().path('features.json',), 'w') as f:
     json.dump({'features': features, 'shapes': shapes}, f)
