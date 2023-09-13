@@ -9,7 +9,6 @@ validate_tfrecord_file = vh.inputs("validate").path()
 test_tfrecord_file = vh.inputs("test").path()
 
 
-# Define a dictionary to store metadata
 metadata = {
     'pythonClassName': 'tensorflow_datasets.core.features.features_dict.FeaturesDict',
     'featuresDict': {
@@ -42,13 +41,15 @@ def calculate_metadata(tfrecord_path):
         for feature_name, feature in example.features.feature.items():
             if feature.HasField('int64_list'):
                 dtype = 'int64'
-                shape = [len(feature.int64_list.value)]
+                shape = []
             elif feature.HasField('float_list'):
-                dtype = 'float32'  # Modify as needed
-                shape = [len(feature.float_list.value)]
+                dtype = 'float32'
+                shape = []
             elif feature.HasField('bytes_list'):
-                dtype = 'string'  # Modify as needed
-                shape = [len(feature.bytes_list.value)]
+                dtype = 'string'
+                # Decode the bytes_list to determine the actual shape
+                value = tf.io.decode_raw(feature.bytes_list.value[0], out_type=tf.uint8)
+                shape = value.shape.as_list()
             else:
                 dtype = 'unknown'
                 shape = []
@@ -63,6 +64,7 @@ def generate_metadata(tfrecord_path, output_path):
     # Save the metadata to a JSON file
     with open(output_path, 'w') as metadata_file:
         json.dump(metadata, metadata_file, indent=4)
+
 
 
 
