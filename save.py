@@ -160,7 +160,7 @@ def parse_tfrecord(tfrecord_path, saved_model_path, signature_key='classify'):
             prediction = predict_with_model(model, signature, image_encoded)
             
             # Process the prediction using the process_prediction function
-            processed_prediction = process_prediction(prediction, label_map_dict)
+            processed_prediction = process_prediction(prediction)
 
             # Append the processed prediction to the list
             predictions_list.append(processed_prediction)
