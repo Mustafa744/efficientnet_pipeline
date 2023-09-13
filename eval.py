@@ -47,7 +47,7 @@ def calculate_metadata(tfrecord_path):
                 dtype = 'float32'
                 shape = []
             elif feature.HasField('bytes_list'):
-                dtype = 'string'
+                dtype = 'uint8'
                 # Decode the bytes_list to determine the actual shape
                 value = tf.io.decode_raw(feature.bytes_list.value[0], out_type=tf.uint8)
                 shape = value.shape.as_list()
