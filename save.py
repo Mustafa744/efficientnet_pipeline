@@ -235,8 +235,6 @@ def calculate_class_metrics(predictions_list, label_map_dict, confidence_thresho
 
     return evaluation_json
 
-predictions = parse_tfrecord(tfrecord_path, saved_model_path)
-
 # Load the label map from the provided labels_map.pbtxt file
 label_map_path = vh.inputs("labels_map").path()  # Replace with your file path
 label_map_dict = load_label_map(label_map_path)
@@ -248,7 +246,7 @@ saved_model_path = '/home/tensorflow/models/research/saved_model'  # Updated pat
 tfrecord_path = vh.inputs("tf_record").path()  # Replace with your TFRecord file path
 
 # Parse the TFRecord and make predictions
-predictions = parse_tfrecord(tfrecord_path, saved_model_path)
+predictions = parse_tfrecord(tfrecord_path, saved_model_path, label_map_dict)
 
 # Calculate class-wise metrics
 confidence_threshold = 0.05  # Replace with your desired confidence threshold
