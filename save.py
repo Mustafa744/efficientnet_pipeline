@@ -99,7 +99,7 @@ def predict_with_model(model, signature, image_bytes):
     # Return the predicted classes and probabilities
     return {"Predicted Classes": output_classes, "Predicted Probabilities": output_probabilities}
 
-def process_prediction(predictions, label_map_dict):
+def process_prediction(prediction):
     """Process model predictions and return class label, class name, and probability.
 
     Args:
@@ -109,10 +109,9 @@ def process_prediction(predictions, label_map_dict):
     Returns:
         dict: Class label, class name, and probability.
     """
-    prediction_data = predictions['printing prediction...']
-    predicted_classes = prediction_data["classes"].numpy()
-    predicted_probabilities = prediction_data["probabilities"].numpy()
-
+    predicted_classes = prediction["classes"].numpy()
+    predicted_probabilities = prediction["probabilities"].numpy()
+    global label_map_dict
     # Assuming 'classes' contains a single class label (tf.Tensor), extract it
     class_label = int(predicted_classes[0])
 
@@ -158,16 +157,16 @@ def parse_tfrecord(tfrecord_path, saved_model_path, signature_key='classify'):
             image_encoded = example.features.feature['image/encoded'].bytes_list.value[0]
 
             # Make predictions on the image
-            predictions = predict_with_model(model, signature, image_encoded)
+            prediction = predict_with_model(model, signature, image_encoded)
             
             # Process the prediction using the process_prediction function
-            processed_prediction = process_prediction(predictions, label_map_dict)
+            processed_prediction = process_prediction(prediction, label_map_dict)
 
             # Append the processed prediction to the list
             predictions_list.append(processed_prediction)
 
-            # Append the predictions to the list
-            predictions_list.append(predictions)
+            # Append the prediction to the list
+            predictions_list.append(prediction)
 
         except Exception as e:
             print(f"Error processing TFRecord {idx}: {e}")
