@@ -93,8 +93,6 @@ def predict_with_model(model, signature, image_bytes):
     # Extract the output tensors from the predictions
     output_classes = predictions['classes']
     output_probabilities = predictions['probabilities']
-    # with vh.metadata.logger() as logger:
-    #     logger.log("printing prediction...", predictions)
 
     # Return the predicted classes and probabilities
     return {"Predicted Classes": output_classes, "Predicted Probabilities": output_probabilities}
@@ -122,8 +120,8 @@ def process_prediction(prediction):
     probabilities = predicted_probabilities[0]
 
     return {
-        "Class Label": class_label,
-        "Class Name": class_name,
+        "Predicted Label": class_label,
+        "Predicted Class Name": class_name,
         "Probability": probabilities[class_label]
     }
 
@@ -165,15 +163,13 @@ def parse_tfrecord(tfrecord_path, saved_model_path, signature_key='classify'):
         # Append the processed prediction to the list
         predictions_list.append(processed_prediction)
 
-        # Append the prediction to the list
-        predictions_list.append(prediction)
-
         # except Exception as e:
         #     print(f"Error processing TFRecord {idx}: {e}")
         #     print(e)
             
-    # with vh.metadata.logger() as logger:
-    #     logger.log("predictions", predictions_list)
+    with vh.metadata.logger() as logger:
+        logger.log("predictions", predictions_list)
+    
     return predictions_list
 
 def calculate_class_metrics(predictions_list, label_map_dict, confidence_threshold=0.05):
@@ -248,7 +244,6 @@ tfrecord_path = vh.inputs("tf_record").path()  # Replace with your TFRecord file
 # Parse the TFRecord and make predictions
 predictions = parse_tfrecord(tfrecord_path, saved_model_path)
 
-print(predictions)
 # write the predictions to a json file
 with open(vh.outputs().path("predictions.json"), 'w') as f:
     json.dump(predictions, f, indent=2)
