@@ -163,7 +163,7 @@ def parse_tfrecord(tfrecord_path, saved_model_path, signature_key='classify'):
         
         # Process the prediction using the process_prediction function
         processed_prediction = process_prediction(prediction)
-        processed_prediction["True Class Label"] = true_label
+        processed_prediction["True Label"] = true_label
         processed_prediction["True Class Name"] = true_class_name
 
         # Append the processed prediction to the list
