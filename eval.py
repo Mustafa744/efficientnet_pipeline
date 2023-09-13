@@ -1,6 +1,5 @@
 import json
 import tensorflow as tf
-import tensorflow_datasets as tfds
 import valohai as vh
 
 # Define the paths to your TFRecord files using Valohai inputs
@@ -35,7 +34,6 @@ dataset_info = {
     "version": "1.0.0"  # Update with your dataset version
 }
 
-
 # Define a dictionary to store metadata
 features_info = {
     'pythonClassName': 'tensorflow_datasets.core.features.features_dict.FeaturesDict',
@@ -44,9 +42,6 @@ features_info = {
     },
 }
 
-
-
-# dataset_info
 # Define a function to add feature metadata
 def add_feature_metadata(feature_name, dtype, shape):
     features_info['featuresDict']['features'][feature_name] = {
@@ -59,8 +54,8 @@ def add_feature_metadata(feature_name, dtype, shape):
         },
     }
 
-# Define a function to calculate metadata from a TFRecord file
-def calculate_features(tfrecord_path):
+# Define a function to calculate feature metadata from a TFRecord file
+def calculate_feature_metadata(tfrecord_path):
     # Create a TFRecord dataset from the file
     dataset = tf.data.TFRecordDataset(tfrecord_path)
 
@@ -87,10 +82,10 @@ def calculate_features(tfrecord_path):
 
             add_feature_metadata(feature_name, dtype, shape)
 
-# Define a function to generate metadata
-def generate_features(tfrecord_path, output_path):
+# Define a function to generate feature metadata JSON
+def generate_features_metadata(tfrecord_path, output_path):
     # Calculate metadata for the TFRecord file
-    calculate_features(tfrecord_path)
+    calculate_feature_metadata(tfrecord_path)
 
     # Save the metadata to a JSON file
     with open(output_path, 'w') as metadata_file:
@@ -137,12 +132,11 @@ def generate_dataset_info(output_path):
     with open(output_path, "w") as dataset_info_file:
         json.dump(dataset_info, dataset_info_file, indent=4)
 
-# Specify the output path for dataset_info.json
-dataset_info_output_path = vh.outputs().path("dataset_info.json")  # "dataset_info.jso
-
-# Generate the dataset_info.json file
-generate_dataset_info(dataset_info_output_path)
-
-# Specify the output path for features.json
+# Specify the output paths for dataset_info.json and features.json
+dataset_info_output_path = vh.outputs().path("dataset_info.json")
 features_info_output_path = vh.outputs().path("features.json")
-generate_features(train_tfrecord_path, features_info_output_path)
+
+# Generate the dataset_info.json file for the train TFRecord
+generate_dataset_info(dataset_info_output_path)
+# Generate the features.json file for the train TFRecord
+generate_features_metadata(train_tfrecord_path, features_info_output_path)
