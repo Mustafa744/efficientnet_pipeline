@@ -93,9 +93,8 @@ def predict_with_model(model, signature, image_bytes):
     # Extract the output tensors from the predictions
     output_classes = predictions['classes']
     output_probabilities = predictions['probabilities']
-    with vh.metadata.logger() as logger:
-        logger.log("printing prediction...", predictions)
-    raise Exception("stop")
+    # with vh.metadata.logger() as logger:
+    #     logger.log("printing prediction...", predictions)
 
     # Return the predicted classes and probabilities
     return {"Predicted Classes": output_classes, "Predicted Probabilities": output_probabilities}
@@ -104,22 +103,23 @@ def process_prediction(predictions, label_map_dict):
     """Process model predictions and return class label, class name, and probability.
 
     Args:
-        predictions (dict): Model predictions with 'Predicted Classes' and 'Predicted Probabilities' keys.
+        predictions (dict): Model predictions with 'printing prediction...' key containing 'classes' and 'probabilities'.
         label_map_dict (dict): A dictionary mapping class labels to class names.
 
     Returns:
         dict: Class label, class name, and probability.
     """
-    predicted_classes = predictions[0]["Predicted Classes"].numpy()
-    predicted_probabilities = predictions[0]["Predicted Probabilities"].numpy()
+    prediction_data = predictions['printing prediction...']
+    predicted_classes = prediction_data["classes"].numpy()
+    predicted_probabilities = prediction_data["probabilities"].numpy()
 
-    # Assuming 'Predicted Classes' contains a single class label (tf.Tensor), extract it
+    # Assuming 'classes' contains a single class label (tf.Tensor), extract it
     class_label = int(predicted_classes[0])
 
     # Find the class name using the label map
     class_name = label_map_dict.get(class_label, 'Unknown Class')
 
-    # Assuming 'Predicted Probabilities' contains a single set of probabilities, extract them
+    # Assuming 'probabilities' contains a single set of probabilities, extract them
     probabilities = predicted_probabilities[0]
 
     return {
