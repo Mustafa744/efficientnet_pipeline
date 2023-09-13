@@ -231,7 +231,10 @@ def calculate_class_metrics(predictions_list, label_map_dict, confidence_thresho
             "confidenceThreshold": confidence_threshold,
             "f1score": f1_score,
             "precision": precision,
-            "recall": recall
+            "recall": recall,
+            "truePositives": true_positives,
+            "falsePositives": false_positives,
+            "falseNegatives": false_negatives
         })
 
         evaluation_json["evaluatedPerClass"][class_name] = class_metrics
