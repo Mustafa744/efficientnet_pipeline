@@ -31,59 +31,24 @@ train_tfrecord_file = vh.inputs("train").path()
 validate_tfrecord_file = vh.inputs("validate").path()
 test_tfrecord_file = vh.inputs("test").path()
 
-import tensorflow as tf
-import tensorflow_datasets as tfds
+# Load a single example from each of the three TFRecord files to determine the features
+train_example = next(tf.data.TFRecordDataset(train_tfrecord_file).take(1).as_numpy_iterator())
+validate_example = next(tf.data.TFRecordDataset(validate_tfrecord_file).take(1).as_numpy_iterator())
+test_example = next(tf.data.TFRecordDataset(test_tfrecord_file).take(1).as_numpy_iterator())
 
-class CustomTFRecordDataset(tfds.core.GeneratorBasedBuilder):
-    VERSION = tfds.core.Version("1.0.0")
-    RELEASE_NOTES = {"1.0.0": "Initial release"}
+# Define the features of your dataset
+features = {}
+for key in train_example.keys():
+    if train_example[key].dtype == 'float32':
+        features[key] = tf.io.FixedLenFeature([], dtype=tf.float32)
+    elif train_example[key].dtype == 'int64':
+        features[key] = tf.io.FixedLenFeature([], dtype=tf.int64)
 
-    def _info(self):
-        # Define the dataset metadata, including features and labels
-        features = {
-            'image': tfds.features.Image(shape=(28, 28, 1), dtype=tf.uint8),
-            'label': tfds.features.ClassLabel(num_classes=10),
-        }
-        return tfds.core.DatasetInfo(
-            builder=self,
-            description="Custom dataset from TFRecords",
-            features=tfds.features.FeaturesDict(features),
-        )
+# Define the shapes of your dataset
+shapes = {}
+for key in features.keys():
+    shapes[key] = ()
 
-    def _split_generators(self, dl_manager):
-        # Define how to download and extract the dataset
-        # You can specify the file paths or URLs for your TFRecord files here
-
-        splits = {
-            'train': train_tfrecord_file,
-            'validation': validate_tfrecord_file,
-            'test': validate_tfrecord_file,
-        }
-
-        return {split_name: tfds.core.SplitGenerator(
-                name=split_name,
-                gen_kwargs={'file_path': file_path},
-            ) for split_name, file_path in splits.items()}
-
-    def _generate_examples(self, file_path):
-        # Define how to parse the TFRecord files and yield examples
-        # Example:
-        for record in tf.data.TFRecordDataset(file_path):
-            # Parse the record and yield examples
-            # Example:
-            feature_dict = tf.io.parse_single_example(
-                record,
-                features={
-                    'image': tf.io.FixedLenFeature([], tf.string),
-                    'label': tf.io.FixedLenFeature([], tf.int64),
-                }
-            )
-            image = tf.image.decode_image(feature_dict['image'], channels=1)
-            label = feature_dict['label']
-            yield {
-                'image': image,
-                'label': label,
-            }
-
-tfds.builder('custom_tfrecord_dataset')
-os.system("tfds build custom_tfrecord_dataset")
+# Save the features to a JSON file
+with open('features.json', 'w') as f:
+    json.dump({'features': features, 'shapes': shapes}, f)
