@@ -238,6 +238,7 @@ def calculate_class_metrics(predictions_list, label_map_dict, confidence_thresho
 # Load the label map from the provided labels_map.pbtxt file
 label_map_path = vh.inputs("labels_map").path()  # Replace with your file path
 label_map_dict = load_label_map(label_map_path)
+print("Class ID to Class Name Mapping:", label_map_dict)
 
 # Specify the path to the SavedModel
 saved_model_path = '/home/tensorflow/models/research/saved_model'  # Updated path
