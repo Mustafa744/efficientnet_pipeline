@@ -208,30 +208,28 @@ def calculate_class_metrics(predictions_list, label_map_dict, confidence_thresho
             "falseNegatives": 0
         }
 
-        true_positives = 0
-        false_positives = 0
-        false_negatives = 0
-
         for prediction in predictions_list:
             true_class_label = prediction["True Label"]
             predicted_class_label = prediction["Predicted Label"]
             probability = float(prediction["Probability"])
 
-            is_positive = probability >= confidence_threshold
+            true_positive = true_class_label == class_label and predicted_class_label == class_label
+            false_positive = true_class_label != class_label and predicted_class_label == class_label
+            false_negative = true_class_label == class_label and predicted_class_label != class_label
 
-            if true_class_label == class_label and predicted_class_label == class_label:
-                true_positives += 1
-            elif predicted_class_label == class_label:
-                false_positives += 1
-            elif true_class_label == class_label:
-                false_negatives += 1
+            if probability >= confidence_threshold:
+                if true_positive:
+                    class_metrics["truePositives"] += 1
+                elif false_positive:
+                    class_metrics["falsePositives"] += 1
 
-        class_metrics["truePositives"] = true_positives
-        class_metrics["falsePositives"] = false_positives
-        class_metrics["falseNegatives"] = false_negatives
+            if true_negative:
+                class_metrics["trueNegatives"] += 1
+            elif false_negative:
+                class_metrics["falseNegatives"] += 1
 
-        precision = true_positives / (true_positives + false_positives + 1e-8)
-        recall = true_positives / (true_positives + false_negatives + 1e-8)
+        precision = class_metrics["truePositives"] / (class_metrics["truePositives"] + class_metrics["falsePositives"] + 1e-8)
+        recall = class_metrics["truePositives"] / (class_metrics["truePositives"] + class_metrics["falseNegatives"] + 1e-8)
         f1_score = 2 * (precision * recall) / (precision + recall + 1e-8)
 
         class_metrics["confidenceMetricsEntry"].append({
@@ -244,6 +242,8 @@ def calculate_class_metrics(predictions_list, label_map_dict, confidence_thresho
         evaluation_json["evaluatedPerClass"][class_name] = class_metrics
 
     return evaluation_json
+
+
 # Load the label map from the provided labels_map.pbtxt file
 label_map_path = vh.inputs("labels_map").path()  # Replace with your file path
 label_map_dict = load_label_map(label_map_path)

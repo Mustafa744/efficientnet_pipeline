@@ -47,6 +47,8 @@
     image: mo0haned/net
     inputs:
       - name: frozen_model
+      - name: dataset_info
+        default: gs://valohai_object_detection/data/01FZC/01FZCRSPP49MRZ3XTZE8Q8BN3V/output-315/trained/efficientnet/dataset_info.json
     command:
       - pip install --upgrade pip
       - pip install -r requirements.txt
