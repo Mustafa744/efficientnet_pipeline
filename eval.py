@@ -44,8 +44,11 @@ features_info = {
     },
 }
 
+
+
+# dataset_info
 # Define a function to add feature metadata
-def add_feature_dataset_info(feature_name, dtype, shape):
+def add_feature_metadata(feature_name, dtype, shape):
     features_info['featuresDict']['features'][feature_name] = {
         'pythonClassName': 'tensorflow_datasets.core.features.feature.Feature',
         feature_name: {
@@ -56,8 +59,8 @@ def add_feature_dataset_info(feature_name, dtype, shape):
         },
     }
 
-# Define a function to calculate dataset_info from a TFRecord file
-def calculate_dataset_info(tfrecord_path):
+# Define a function to calculate metadata from a TFRecord file
+def calculate_features(tfrecord_path):
     # Create a TFRecord dataset from the file
     dataset = tf.data.TFRecordDataset(tfrecord_path)
 
@@ -82,16 +85,16 @@ def calculate_dataset_info(tfrecord_path):
                 dtype = 'unknown'
                 shape = []
 
-            add_feature_dataset_info(feature_name, dtype, shape)
+            add_feature_metadata(feature_name, dtype, shape)
 
-# Define a function to generate dataset_info
-def generate_dataset_info(tfrecord_path, output_path):
-    # Calculate dataset_info for the TFRecord file
-    calculate_dataset_info(tfrecord_path)
+# Define a function to generate metadata
+def generate_features(tfrecord_path, output_path):
+    # Calculate metadata for the TFRecord file
+    calculate_features(tfrecord_path)
 
-    # Save the dataset_info to a JSON file
-    with open(output_path, 'w') as dataset_info_file:
-        json.dump(dataset_info, dataset_info_file, indent=4)
+    # Save the metadata to a JSON file
+    with open(output_path, 'w') as metadata_file:
+        json.dump(features_info, metadata_file, indent=4)
 
 # Define a function to calculate split information
 def calculate_split_info(split_name, tfrecord_path):
@@ -129,19 +132,17 @@ dataset_info["splits"].append(calculate_split_info("test", test_tfrecord_path))
 dataset_info["splits"].append(calculate_split_info("validate", validate_tfrecord_path))
 
 # Define a function to generate the dataset_info.json file
-def generate_features(output_path):
+def generate_dataset_info(output_path):
     # Save the dataset_info dictionary to a JSON file
     with open(output_path, "w") as dataset_info_file:
         json.dump(dataset_info, dataset_info_file, indent=4)
 
 # Specify the output path for dataset_info.json
-features_output_path = vh.outputs().path("features.json")  # "dataset_info.jso
+dataset_info_output_path = vh.outputs().path("dataset_info.json")  # "dataset_info.jso
 
 # Generate the dataset_info.json file
-generate_features(features_output_path)
+generate_dataset_info(dataset_info_output_path)
 
-
-# Example usage:
-tfrecord_path = train_tfrecord_file
-output_path = vh.outputs().path('dataset_info.json')
-generate_dataset_info(tfrecord_path, output_path)
+# Specify the output path for features.json
+features_info_output_path = vh.outputs().path("features.json")
+generate_features(train_tfrecord_path, features_info_output_path)
