@@ -129,16 +129,16 @@ dataset_info["splits"].append(calculate_split_info("test", test_tfrecord_path))
 dataset_info["splits"].append(calculate_split_info("validate", validate_tfrecord_path))
 
 # Define a function to generate the dataset_info.json file
-def generate_dataset_info(output_path):
+def generate_features(output_path):
     # Save the dataset_info dictionary to a JSON file
     with open(output_path, "w") as dataset_info_file:
         json.dump(dataset_info, dataset_info_file, indent=4)
 
 # Specify the output path for dataset_info.json
-dataset_info_output_path = vh.outputs().path("features.json")  # "dataset_info.jso
+features_output_path = vh.outputs().path("features.json")  # "dataset_info.jso
 
 # Generate the dataset_info.json file
-generate_dataset_info(dataset_info_output_path)
+generate_features(features_output_path)
 
 
 # Example usage:
