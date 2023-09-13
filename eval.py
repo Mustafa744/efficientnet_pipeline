@@ -95,9 +95,9 @@ dataset_info = tfds.core.DatasetInfo(
 )
 
 # Save the dataset info to a JSON file
-with open('dataset_info.json', 'w') as f:
+with open(vh.outputs().path('dataset_info.json'), 'w') as f:
     f.write(dataset_info.as_json)
 
 # Save the features to a JSON file
-with open('features.json', 'w') as f:
+with open(vh.outputs().path('features.json'), 'w') as f:
     f.write(features_dict.as_json)
