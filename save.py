@@ -210,7 +210,7 @@ def calculate_class_metrics(predictions_list, label_map_dict, confidence_thresho
         false_negatives = 0
 
         for prediction in predictions_list:
-            true_class_label = prediction["True Class Label"]
+            true_class_label = prediction["True Label"]
             probability = prediction["Probability"]
 
             is_positive = probability >= confidence_threshold
