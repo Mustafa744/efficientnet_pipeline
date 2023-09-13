@@ -202,7 +202,10 @@ def calculate_class_metrics(predictions_list, label_map_dict, confidence_thresho
 
     for class_name, class_label in label_map_dict.items():
         class_metrics = {
-            "confidenceMetricsEntry": []
+            "confidenceMetricsEntry": [],
+            "truePositives": 0,
+            "falsePositives": 0,
+            "falseNegatives": 0
         }
 
         true_positives = 0
@@ -223,23 +226,24 @@ def calculate_class_metrics(predictions_list, label_map_dict, confidence_thresho
             elif true_class_label == class_label:
                 false_negatives += 1
 
+        class_metrics["truePositives"] = true_positives
+        class_metrics["falsePositives"] = false_positives
+        class_metrics["falseNegatives"] = false_negatives
+
         precision = true_positives / (true_positives + false_positives + 1e-8)
         recall = true_positives / (true_positives + false_negatives + 1e-8)
         f1_score = 2 * (precision * recall) / (precision + recall + 1e-8)
+
         class_metrics["confidenceMetricsEntry"].append({
             "confidenceThreshold": confidence_threshold,
             "f1score": f1_score,
             "precision": precision,
-            "recall": recall,
-            "truePositives": true_positives,
-            "falsePositives": false_positives,
-            "falseNegatives": false_negatives
+            "recall": recall
         })
 
         evaluation_json["evaluatedPerClass"][class_name] = class_metrics
 
     return evaluation_json
-
 # Load the label map from the provided labels_map.pbtxt file
 label_map_path = vh.inputs("labels_map").path()  # Replace with your file path
 label_map_dict = load_label_map(label_map_path)
