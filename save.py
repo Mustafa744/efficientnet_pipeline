@@ -126,7 +126,7 @@ def process_prediction(predictions, label_map_dict):
         "Class Name": class_name,
         "Probability": probabilities[class_label]
     }
- 
+
 def parse_tfrecord(tfrecord_path, saved_model_path, signature_key='classify'):
     """Parse a TFRecord file and make predictions on its contents.
 
@@ -227,6 +227,7 @@ def calculate_class_metrics(predictions_list, label_map_dict, confidence_thresho
         evaluation_json["evaluatedPerClass"][class_name] = class_metrics
 
     return evaluation_json
+
 predictions = parse_tfrecord(tfrecord_path, saved_model_path)
 
 # # Print the predictions (you can process them further as needed)
