@@ -1,42 +1,19 @@
-import tensorflow as tf
-import numpy as np
-import valohai as vh
-import os
 import json
-from tensorflow.io import FixedLenFeature
-
-# dataset_info_path = vh.inputs('dataset_info').path()
-# # read json file
-# with open(dataset_info_path, 'r') as f:
-#     dataset_info = json.load(f)
-#     # print its content
-#     print("loaded json")
-#     print(dataset_info)
-
-# # save the dataset info to a txt file
-# with open(vh.outputs().path("dataset_info.txt"), "w") as f:
-#     f.write(str(dataset_info))
-
-# Define the paths to your TFRecord files
 import tensorflow as tf
 import tensorflow_datasets as tfds
-import json
+import valohai
 
-# # Define the paths to your TFRecord files
-# train_tfrecord_file = 'gs://valohai_object_detection/data/01FZC/01FZCRSPP49MRZ3XTZE8Q8BN3V/output-315/trained/efficientnet/train-0.tfrecord-00000-of-00001'
-# validate_tfrecord_file = 'gs://valohai_object_detection/data/01FZC/01FZCRSPP49MRZ3XTZE8Q8BN3V/output-315/trained/efficientnet/validation-0.tfrecord-00000-of-00001'
-# test_tfrecord_file = 'gs://valohai_object_detection/data/01FZC/01FZCRSPP49MRZ3XTZE8Q8BN3V/output-315/trained/efficientnet/test-0.tfrecord-00000-of-00001'
-
-train_tfrecord_file = vh.inputs("train").path()
-validate_tfrecord_file = vh.inputs("validate").path()
-test_tfrecord_file = vh.inputs("test").path()
+# Define the paths to your TFRecord files using Valohai inputs
+train_tfrecord_file = valohai.inputs("train").path()
+validate_tfrecord_file = valohai.inputs("validate").path()
+test_tfrecord_file = valohai.inputs("test").path()
 
 # Create a function to calculate metadata from TFRecord files
 def calculate_metadata(tfrecord_file):
     features = {}
     shapes = {}
     
-    # Read TFRecord files to calculate metadata
+    # Read TFRecord files to determine feature names and data types
     dataset = tf.data.TFRecordDataset(tfrecord_file)
     for record in dataset.take(1):
         example = tf.io.parse_single_example(record, features)
@@ -72,8 +49,8 @@ metadata = {
     }
 }
 
-# Save the metadata to a JSON file
-with open(vh.outputs().path('metadata.json'), 'w') as metadata_file:
+# Save the metadata to a JSON file at the Valohai output path
+with open(valohai.outputs().path('metadata.json'), 'w') as metadata_file:
     json.dump(metadata, metadata_file, indent=4)
 
 # Print the generated metadata
