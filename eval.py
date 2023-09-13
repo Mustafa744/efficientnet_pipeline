@@ -135,7 +135,7 @@ def generate_dataset_info(output_path):
         json.dump(dataset_info, dataset_info_file, indent=4)
 
 # Specify the output path for dataset_info.json
-dataset_info_output_path = vh.outputs().path("dataset_info.json")  # "dataset_info.jso
+dataset_info_output_path = vh.outputs().path("features.json")  # "dataset_info.jso
 
 # Generate the dataset_info.json file
 generate_dataset_info(dataset_info_output_path)
