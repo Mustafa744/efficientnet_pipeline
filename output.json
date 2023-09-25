@@ -1,0 +1,98 @@
+{
+    "pythonClassName": "tensorflow_datasets.core.features.features_dict.FeaturesDict",
+    "featuresDict": {
+        "features": {
+            "image/width": {
+                "pythonClassName": "tensorflow_datasets.core.features.feature.Feature",
+                "image/width": {
+                    "dtype": "int64",
+                    "shape": {
+                        "dimensions": []
+                    }
+                }
+            },
+            "image/class/label": {
+                "pythonClassName": "tensorflow_datasets.core.features.feature.Feature",
+                "image/class/label": {
+                    "dtype": "int64",
+                    "shape": {
+                        "dimensions": []
+                    }
+                }
+            },
+            "image/encoded": {
+                "pythonClassName": "tensorflow_datasets.core.features.feature.Feature",
+                "image/encoded": {
+                    "dtype": "uint8",
+                    "shape": {
+                        "dimensions": [
+                            "52638"
+                        ]
+                    }
+                }
+            },
+            "image/format": {
+                "pythonClassName": "tensorflow_datasets.core.features.feature.Feature",
+                "image/format": {
+                    "dtype": "uint8",
+                    "shape": {
+                        "dimensions": [
+                            "4"
+                        ]
+                    }
+                }
+            },
+            "image/filename": {
+                "pythonClassName": "tensorflow_datasets.core.features.feature.Feature",
+                "image/filename": {
+                    "dtype": "uint8",
+                    "shape": {
+                        "dimensions": [
+                            "16"
+                        ]
+                    }
+                }
+            },
+            "image/class/text": {
+                "pythonClassName": "tensorflow_datasets.core.features.feature.Feature",
+                "image/class/text": {
+                    "dtype": "uint8",
+                    "shape": {
+                        "dimensions": [
+                            "7"
+                        ]
+                    }
+                }
+            },
+            "image/height": {
+                "pythonClassName": "tensorflow_datasets.core.features.feature.Feature",
+                "image/height": {
+                    "dtype": "int64",
+                    "shape": {
+                        "dimensions": []
+                    }
+                }
+            },
+            "image/colorspace": {
+                "pythonClassName": "tensorflow_datasets.core.features.feature.Feature",
+                "image/colorspace": {
+                    "dtype": "uint8",
+                    "shape": {
+                        "dimensions": [
+                            "3"
+                        ]
+                    }
+                }
+            },
+            "image/channels": {
+                "pythonClassName": "tensorflow_datasets.core.features.feature.Feature",
+                "image/channels": {
+                    "dtype": "int64",
+                    "shape": {
+                        "dimensions": []
+                    }
+                }
+            }
+        }
+    }
+}
