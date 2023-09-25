@@ -91,8 +91,6 @@
         step: eval step
 
     edges:
-      - [metadata.output.dataset_info.json, train.input.dataset_info]
-      - [metadata.output.features.json, train.input.features]
       - [train.output.trained.zip, save.input.trained_model]
       - [train.output.saved.zip, save.input.saved_model]
       - [train.input.labels_map, save.input.labels_map]

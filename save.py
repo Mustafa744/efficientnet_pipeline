@@ -256,12 +256,16 @@ tfrecord_path = vh.inputs("tf_record").path()  # Replace with your TFRecord file
 
 # Parse the TFRecord and make predictions
 predictions = parse_tfrecord(tfrecord_path, saved_model_path)
-    
-# Calculate class-wise metrics
-confidence_threshold = 0.05  # Replace with your desired confidence threshold
-evaluation_json = calculate_class_metrics(predictions, label_map_dict, confidence_threshold)
+  
+# save predictions as txt file
+with open(vh.outputs().path("predictions.txt"), 'w') as f:
+    f.write(str(predictions))
+      
+# # Calculate class-wise metrics
+# confidence_threshold = 0.05  # Replace with your desired confidence threshold
+# evaluation_json = calculate_class_metrics(predictions, label_map_dict, confidence_threshold)
 
-# save the evaluation JSON as json file 
-with open(vh.outputs().path("evaluation.json"), 'w') as f:
-    json.dump(evaluation_json, f, indent=2)
+# # save the evaluation JSON as json file 
+# with open(vh.outputs().path("evaluation.json"), 'w') as f:
+#     json.dump(evaluation_json, f, indent=2)
 
