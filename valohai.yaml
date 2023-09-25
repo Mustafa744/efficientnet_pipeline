@@ -77,9 +77,9 @@
 - pipeline:
     name: preprocess-and-train
     nodes:
-      - name: metadata
-        type: execution
-        step: meta data step
+      # - name: metadata
+      #   type: execution
+      #   step: meta data step
       - name: train
         type: execution
         step: train step
