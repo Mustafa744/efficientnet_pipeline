@@ -162,12 +162,12 @@ def parse_tfrecord(tfrecord_path, saved_model_path, signature_key='classify'):
         prediction = predict_with_model(model, signature, image_encoded)
         
         # Process the prediction using the process_prediction function
-        processed_prediction = process_prediction(prediction)
-        processed_prediction["True Label"] = true_label
-        processed_prediction["True Class Name"] = true_class_name
+        # processed_prediction = process_prediction(prediction)
+        # processed_prediction["True Label"] = true_label
+        # processed_prediction["True Class Name"] = true_class_name
 
         # Append the processed prediction to the list
-        predictions_list.append(processed_prediction)
+        predictions_list.append(prediction)
 
         # except Exception as e:
         #     print(f"Error processing TFRecord {idx}: {e}")
