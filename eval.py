@@ -15,7 +15,7 @@ class HandleTFRecord :
 
     def get_tfrecord_images(self):
         record_iterator = tf.compat.v1.python_io.tf_record_iterator(path=self.tfrecord_path)
-
+        print("***************************")
         # Iterate over all records in the TFRecord file
         for i, string_record in enumerate(record_iterator):
             # Parse the next example
@@ -44,9 +44,30 @@ class HandleTFRecord :
 
             # Yield the image and label
             yield image, label
-            
-            
-            
+        
+    def copy_tfrecord(input_path, output_path):
+        # Open the input TFRecord file
+        record_iterator = tf.compat.v1.python_io.tf_record_iterator(path=input_path)
+
+        # Create a new TFRecord file for the output
+        writer = tf.python_io.TFRecordWriter(output_path)
+
+        # Iterate over all records in the input TFRecord file
+        for string_record in record_iterator:
+            # Parse the next example
+            example = tf.train.Example()
+            example.ParseFromString(string_record)
+
+            # Serialize the example to a string
+            serialized = example.SerializeToString()
+
+            # Write the serialized example to the output TFRecord file
+            writer.write(serialized)
+
+        # Close the output TFRecord file
+        writer.close()
+                
+                
 
 handler = HandleTFRecord(test_tfrecord)
-handler.get_tfrecord_images()
+handler.copy_tfrecord(test_tfrecord, vh.outputs().path("test_tfrecord.tfrecord"))
