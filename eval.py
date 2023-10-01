@@ -45,7 +45,7 @@ class HandleTFRecord :
             # Yield the image and label
             yield image, label
         
-    def copy_tfrecord(input_path, output_path):
+    def copy_tfrecord(self, input_path, output_path):
         # Open the input TFRecord file
         record_iterator = tf.compat.v1.python_io.tf_record_iterator(path=input_path)
 
@@ -74,3 +74,4 @@ output_path = vh.outputs().path("testtt_tfrecord.tfrecord")
 # print using valohai metadata logger
 print( f"input {test_tfrecord} \noutput {output_path}")    
 handler.copy_tfrecord(test_tfrecord, output_path)
+handler.get_tfrecord_images()
