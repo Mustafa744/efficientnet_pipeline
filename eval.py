@@ -5,7 +5,7 @@ class HandleTFRecord:
     def __init__(self, tfrecord_path):
         self.tfrecord_path = tfrecord_path
 
-    def get_tfrecord_images(self):
+    def get_tfrecord_images(self,tfrecord_path):
         # Create a TFRecordDataset from the TFRecord file
         dataset = tf.data.TFRecordDataset(self.tfrecord_path)
 
@@ -39,6 +39,7 @@ class HandleTFRecord:
             yield image.numpy(), label.numpy()
 
     def copy_tfrecord(self, input_path, output_path):
+        print("attempting to copy tfrecord")
         # Open the input TFRecord file
         record_iterator = tf.compat.v1.python_io.tf_record_iterator(path=input_path)
 
@@ -59,9 +60,12 @@ class HandleTFRecord:
 
         # Close the output TFRecord file
         writer.close()
+        print("done copying tfrecord")
 
 # Example usage
 test_tfrecord = vh.inputs("test").path()
 output_path = vh.outputs().path("testtt.tfrecord")
 handler = HandleTFRecord(test_tfrecord)
 handler.copy_tfrecord(test_tfrecord, output_path)
+
+handler.get_tfrecord_images(test_tfrecord )
