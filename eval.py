@@ -71,4 +71,6 @@ class HandleTFRecord :
 
 handler = HandleTFRecord(test_tfrecord)
 output_path = vh.outputs().path("testtt_tfrecord.tfrecord")
+# print using valohai metadata logger
+print( f"input {test_tfrecord} \noutput {output_path}")    
 handler.copy_tfrecord(test_tfrecord, output_path)
