@@ -1,56 +1,49 @@
-import valohai as vh
 import tensorflow as tf
-import numpy as np
-import cv2
-import os
-# load test tf record from valohai inputs
-test_tfrecord = vh.inputs("test").path()
+import valohai as vh
 
-
-class HandleTFRecord :
-    def __init__(self,tfrecord_path:str) -> None:
+class HandleTFRecord:
+    def __init__(self, tfrecord_path):
         self.tfrecord_path = tfrecord_path
-        
-    
 
     def get_tfrecord_images(self):
-        record_iterator = tf.compat.v1.python_io.tf_record_iterator(path=self.tfrecord_path)
-        print("***************************")
-        # Iterate over all records in the TFRecord file
-        for i, string_record in enumerate(record_iterator):
-            # Parse the next example
-            example = tf.train.Example()
-            example.ParseFromString(string_record)
+        # Create a TFRecordDataset from the TFRecord file
+        dataset = tf.data.TFRecordDataset(self.tfrecord_path)
 
-            # Get the image data and label from the example
-            image_data = example.features.feature['image'].bytes_list.value[0]
-            label = example.features.feature['label'].int64_list.value[0]
+        # Define the feature description for the TFRecord
+        feature_description = {
+            'image': tf.io.FixedLenFeature([], tf.string),
+            'label': tf.io.FixedLenFeature([], tf.int64),
+            'height': tf.io.FixedLenFeature([], tf.int64),
+            'width': tf.io.FixedLenFeature([], tf.int64),
+            'channels': tf.io.FixedLenFeature([], tf.int64),
+        }
 
-            # Get the height, width, and channels of the image
-            height = example.features.feature['height'].int64_list.value[0]
-            width = example.features.feature['width'].int64_list.value[0]
-            channels = example.features.feature['channels'].int64_list.value[0]
+        # Parse each example in the dataset
+        def _parse_example(example_proto):
+            example = tf.io.parse_single_example(example_proto, feature_description)
 
-            # Convert the image data to a NumPy array
-            image = np.frombuffer(image_data, dtype=np.uint8)
+            # Decode the image data
+            image = tf.io.decode_image(example['image'], channels=example['channels'])
 
-            # Reshape the image array to its original shape
-            image = image.reshape((height, width, channels))
+            # Reshape the image to its original shape
+            image = tf.reshape(image, [example['height'], example['width'], example['channels']])
 
-            # Save the image to disk
-            filename = f'image_{label}_{i}.jpg'
-            output_path = vh.outputs().path(filename)
-            cv2.imwrite(output_path, image)
+            # Return the image and label
+            return image, example['label']
 
-            # Yield the image and label
-            yield image, label
-        
+        # Map the parse function over the dataset
+        dataset = dataset.map(_parse_example)
+
+        # Yield each image and label
+        for image, label in dataset:
+            yield image.numpy(), label.numpy()
+
     def copy_tfrecord(self, input_path, output_path):
         # Open the input TFRecord file
         record_iterator = tf.compat.v1.python_io.tf_record_iterator(path=input_path)
 
         # Create a new TFRecord file for the output
-        writer = tf.python_io.TFRecordWriter(output_path)
+        writer = tf.io.TFRecordWriter(output_path)
 
         # Iterate over all records in the input TFRecord file
         for string_record in record_iterator:
@@ -66,12 +59,9 @@ class HandleTFRecord :
 
         # Close the output TFRecord file
         writer.close()
-                
-                
 
+# Example usage
+test_tfrecord = vh.inputs("test").path()
+output_path = vh.outputs().path("testtt.tfrecord")
 handler = HandleTFRecord(test_tfrecord)
-output_path = vh.outputs().path("testtt_tfrecord.tfrecord")
-# print using valohai metadata logger
-print( f"input {test_tfrecord} \noutput {output_path}")    
 handler.copy_tfrecord(test_tfrecord, output_path)
-handler.get_tfrecord_images()
