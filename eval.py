@@ -1,6 +1,9 @@
 import tensorflow as tf
 import valohai as vh
 
+# use tf eager execution
+tf.compat.v1.enable_eager_execution()
+
 class HandleTFRecord:
     def __init__(self, tfrecord_path):
         self.tfrecord_path = tfrecord_path
