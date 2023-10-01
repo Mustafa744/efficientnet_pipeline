@@ -9,43 +9,47 @@ class HandleTFRecord:
     def __init__(self, tfrecord_path):
         self.tfrecord_path = tfrecord_path
 
+    
     def get_tfrecord_images(self,tfrecord_path):
+        dataset = tf.data.TFRecordDataset(tfrecord_path)
+        for i, record in enumerate(dataset):
+            example = tf.train.Example()
+            example.ParseFromString(record.numpy())
+        for feature_name, feature in example.features.feature.items():
+                if feature.HasField('bytes_list'):
+                    # Assume the bytes_list contains image data in raw format
+                    image_bytes = feature.bytes_list.value[0]
+                    
+                    # Decode the raw bytes to an image tensor (Assuming RGB images)
+                    image = tf.io.decode_image(image_bytes, channels=3)
+                    
+                    # You can do further processing here if needed, like resizing or normalization
+                    
+                    # Save the image to disk
+                    image_filename = f'image_{i}.png'  # You can change the filename as per your requirement
+                    image_path = vh.outputs().path(image_filename)
+                    tf.keras.preprocessing.image.save_img(image_path, image)
+                    print(f'Saved image {i} to {image_path}')
+        # for record in enumerate(dataset):
+        #     example = tf.train.Example()
+        #     example.ParseFromString(record.numpy())
+
+        #     for feature_name, feature in example.features.feature.items():
+        #         if feature.HasField('int64_list'):
+        #             dtype = 'int64'
+        #             shape = []
+        #         elif feature.HasField('float_list'):
+        #             dtype = 'float32'
+        #             shape = []
+        #         elif feature.HasField('bytes_list'):
+        #             dtype = 'uint8'
+        #             # Decode the bytes_list to determine the actual shape
+        #             value = tf.io.decode_raw(feature.bytes_list.value[0], out_type=tf.uint8)
+        #             shape = value.shape.as_list()
+        #         else:
+        #             dtype = 'unknown'
+        #             shape = []
         
-        # Create a TFRecordDataset from the TFRecord file
-        dataset = tf.data.TFRecordDataset(self.tfrecord_path)
-
-        # Define the feature description for the TFRecord
-        feature_description = {
-            'image': tf.io.FixedLenFeature([], tf.string),
-            'label': tf.io.FixedLenFeature([], tf.int64),
-            'height': tf.io.FixedLenFeature([], tf.int64),
-            'width': tf.io.FixedLenFeature([], tf.int64),
-            'channels': tf.io.FixedLenFeature([], tf.int64),
-        }
-
-        # Parse each example in the dataset
-        def _parse_example(example_proto):
-            example = tf.io.parse_single_example(example_proto, feature_description)
-
-            # Decode the image data
-            image = tf.io.decode_image(example['image'], channels=example['channels'])
-
-            # Reshape the image to its original shape
-            image = tf.reshape(image, [example['height'], example['width'], example['channels']])
-
-            # save image
-            tf.io.write_file(f"{vh.outputs().path('images')}/image{HandleTFRecord.image_id}.jpg", tf.image.encode_jpeg(image))
-            HandleTFRecord.image_id += 1
-            # Return the image and label
-            return image, example['label']
-
-        # Map the parse function over the dataset
-        dataset = dataset.map(_parse_example)
-
-        # Yield each image and label
-        for image, label in dataset:
-            yield image.numpy(), label.numpy()
-            print(f"label : {label.numpy()}")
 
     def copy_tfrecord(self, input_path, output_path):
         print("attempting to copy tfrecord")
