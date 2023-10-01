@@ -70,4 +70,5 @@ class HandleTFRecord :
                 
 
 handler = HandleTFRecord(test_tfrecord)
-handler.copy_tfrecord(test_tfrecord, vh.outputs().path("test_tfrecord.tfrecord"))
+output_path = vh.outputs().path("testtt_tfrecord.tfrecord")
+handler.copy_tfrecord(test_tfrecord, output_path)
