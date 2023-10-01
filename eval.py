@@ -5,10 +5,12 @@ import valohai as vh
 tf.compat.v1.enable_eager_execution()
 
 class HandleTFRecord:
+    image_id = 0
     def __init__(self, tfrecord_path):
         self.tfrecord_path = tfrecord_path
 
     def get_tfrecord_images(self,tfrecord_path):
+        
         # Create a TFRecordDataset from the TFRecord file
         dataset = tf.data.TFRecordDataset(self.tfrecord_path)
 
@@ -31,6 +33,9 @@ class HandleTFRecord:
             # Reshape the image to its original shape
             image = tf.reshape(image, [example['height'], example['width'], example['channels']])
 
+            # save image
+            tf.io.write_file(f"{vh.outputs().path('images')}/image{HandleTFRecord.image_id}.jpg", tf.image.encode_jpeg(image))
+            HandleTFRecord.image_id += 1
             # Return the image and label
             return image, example['label']
 
@@ -40,6 +45,7 @@ class HandleTFRecord:
         # Yield each image and label
         for image, label in dataset:
             yield image.numpy(), label.numpy()
+            print(f"label : {label.numpy()}")
 
     def copy_tfrecord(self, input_path, output_path):
         print("attempting to copy tfrecord")
