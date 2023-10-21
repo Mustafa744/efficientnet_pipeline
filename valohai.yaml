@@ -72,12 +72,27 @@
       - pip install -r requirements.txt
       - python eval.py
 
+- step:
+    name: generate tfrecord
+    image: mo0haned/net
+    inputs:
+      - name: csv_path
+        default: dataset.csv
+
+      - name: labels_map_path
+        default: labelmap.pbtxt
+
+    command:
+      - pip install --upgrade pip
+      - pip install -r requirements.txt
+      - python tfrecord_code.py
+
 - pipeline:
     name: preprocess-and-train
     nodes:
-      # - name: metadata
-      #   type: execution
-      #   step: meta data step
+      - name: generate_tfrecord
+        type: execution
+        step: generate tfrecord
       - name: train
         type: execution
         step: train step
@@ -89,6 +104,7 @@
         step: eval step
 
     edges:
+      - [generate_tfrecord.output.tfrecord, train.input.trained_model]
       - [train.output.trained.zip, save.input.trained_model]
       - [train.output.saved.zip, save.input.saved_model]
       - [train.input.labels_map, save.input.labels_map]

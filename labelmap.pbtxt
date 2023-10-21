@@ -1,0 +1,20 @@
+item {
+  id: 1
+  name: 'damaged_case_code'
+}
+item {
+  id: 2
+  name: 'no_damaged_case_code'
+}
+item {
+  id: 3
+  name: 'plastic'
+}
+item {
+  id: 4
+  name: 'poor_print_quality'
+}
+item {
+  id: 5
+  name: 'wavy'
+}
